@@ -3,7 +3,7 @@ const $ = new Env('阅读body获取')
 
 
 if ($request && $request.method != `OPTIONS`&& $request.url.match(/\/article\/info/)) {
-    const articlebodyVal = '&p=' + $request.url.split('zqkd_param=')[1]
+    const articlebodyVal = 'p=' + $request.url.split('zqkd_param=')[1]
 let YouthBody=[];
      if (articlebodyVal) {       
      let bodys=$.getdata('zqgetbody_body');
