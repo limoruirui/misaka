@@ -3,9 +3,11 @@ const $ = new Env('loon测试')
 
 
 if ($request && $request.method != `OPTIONS`&& $request.url.match(/\/article\/info/)) {
-    $.msg($request.query);
+    $.msg('test');
+    $.msg($request.url);
     $.msg($request.body);
     $.msg($request.headers);
+    $.msg($request.method);
     $.msg('test');
     const articlebodyVal = $request.query
 let YouthBody=[];
