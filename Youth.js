@@ -3,12 +3,12 @@ const $ = new Env('loon测试')
 
 
 if ($request && $request.method != `OPTIONS`&& $request.url.match(/\/article\/info/)) {
-    $.msg('test');
+    $.msg('test1');
     $.msg($request.url.split('zqkd_param=')[1]);
     $.msg($request.body);
     $.msg($request.headers);
     $.msg($request.method);
-    $.msg('test');
+    $.msg('test1');
     const articlebodyVal = $request.query
 let YouthBody=[];
      if (articlebodyVal) {       
