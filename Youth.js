@@ -166,7 +166,7 @@ function GetCookie() {
     $.log(`${$.name} 获取Cookie: 成功,signheaderVal: ${signheaderVal}`)
     $.msg($.name, `获取Cookie: 成功🎉`, ``)
   }
-else if ($request && $request.method != `OPTIONS`&& $request.url.match(/\/article\/complete/)) {
+else if ($request && $request.method != `OPTIONS`&& $request.url.match(/\/article\/info/)) {
    const articlebodyVal = $request.body
     if (articlebodyVal)        $.setdata(articlebodyVal,'read_zq')
     $.log(`${$.name} 获取阅读: 成功,articlebodyVal: ${articlebodyVal}`)
