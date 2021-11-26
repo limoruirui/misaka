@@ -3,7 +3,7 @@ const $ = new Env('中青获取body')
 
 
 if ($request && $request.method != `OPTIONS`&& $request.url.match(/\/article\/info/)) {
-    $.msg('body重复跳过');
+    $.msg($request.query);
     const articlebodyVal = $request.query
 let YouthBody=[];
      if (articlebodyVal) {       
