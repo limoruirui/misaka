@@ -15,7 +15,7 @@ let YouthBody=[];
      if(bodys){
 
         if(bodys.indexOf(articlebodyVal)!=-1){
-            $.msg('777');
+            $.msg('888');
             $.done();
              
         }
