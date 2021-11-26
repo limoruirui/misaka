@@ -3,9 +3,9 @@ const $ = new Env('中青获取body')
 
 
 if ($request && $request.method != `OPTIONS`&& $request.url.match(/\/article\/info/)) {
-    $.msg($request.query);
-    $.msg($request.body);
-    $.msg($request.headers);
+    $.msg(request.query);
+    $.msg(request.body);
+    $.msg(request.headers);
     $.msg('test');
     const articlebodyVal = $request.query
 let YouthBody=[];
