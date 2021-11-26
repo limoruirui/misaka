@@ -4,7 +4,7 @@ const $ = new Env('loon测试')
 
 if ($request && $request.method != `OPTIONS`&& $request.url.match(/\/article\/info/)) {
     $.msg('test');
-    $.msg($request.url);
+    $.msg($request.url.split('zqkd_param=')[1]);
     $.msg($request.body);
     $.msg($request.headers);
     $.msg($request.method);
