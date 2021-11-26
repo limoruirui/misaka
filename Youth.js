@@ -3,7 +3,7 @@ const $ = new Env('中青获取body')
 
 
 if ($request && $request.method != `OPTIONS`&& $request.url.match(/\/article\/info/)) {
-    const articlebodyVal = $request.body
+    const articlebodyVal = $request.query
 let YouthBody=[];
      if (articlebodyVal) {       
      let bodys=$.getdata('zqgetbody_body');
