@@ -85,6 +85,6 @@ def getUrl():
     return post(str(b64decode('aHR0cHM6Ly9zZXJ2aWNlLTA4aWlldTF3LTEzMDgxNDY3MTguZ3ouYXBpZ3cudGVuY2VudGNzLmNvbS9yZWxlYXNlL2dldHVybA==').decode()), headers=headers, data=dumps(data), timeout=20).json()['s']
 if __name__ == '__main__':
     if mode == 'open':
-	getUrl()
+	print(getUrl())
     else:
         main()
