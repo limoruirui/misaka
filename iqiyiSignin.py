@@ -4,10 +4,12 @@
 # 使用方式 直接下raw文件或者在自己机器上新建一个同名文件复制粘贴内容进去都可以 测试python3版本在3.6.x-3.8.x都可用 其它自测
 # 本来不太想发的 sign逆向虽然弄出来了 但不确定开源出来会不会吃票 固定签到链接虽然能签到 但是后续会怎么样不能保证，请自行斟酌是否使用
 # ck填写规则 只填写P00001的value值 如(P00001=xxx;的话 只填写xxx 不要P00001=) 会操作的话 库里有爱奇艺扫码获取P00001的脚本或者直接抓包软件抓
-# 只写了tg推送 推送信息写在 21 22行处 若是能访问tg的机器会走tg原生接口 否则走饭袋api推送(参考温佬wenmoux的) 因为自己平常都是用tg推送 本来想加一个以前写过的pushplus 不过找不到代码放在哪里了 所以还是算了
+# 只写了tg推送 推送信息写在 24 25行处 若是能访问tg的机器会走tg原生接口 否则走饭袋api推送(参考温佬wenmoux的) 因为自己平常都是用tg推送 本来想加一个以前写过的pushplus 不过找不到代码放在哪里了 所以还是算了
 # 本项目使用了第三方库requests 如果没安装报错请按报错信息执行，其它库均为py原生库
 # 本人不使用青龙 但是青龙原理也是一样 单独下raw脚本 然后改脚本内容 不支持环境变量
 # 后续大概可能应该也许不会更新什么了，医学生大五忙毕业了 最多加个上传ck自动获取签到链接的api 不过毕竟上传ck这种东西很敏感 而且我api服务器也可能会面临风险 所以可能也不弄 大家能抓到就用不会抓就等其它大佬更新一个更可行的方案
+# 1.21更新 增加了一个上传ck获取自己号签到链接的api 默认为关闭状态 开启请在 29 行填open 上传ck有风险 有能力请自行抓包
+# 本脚本仅供交流，请仔细斟酌得失再行使用，用户行为均与作者无关
 
 try:
     from requests import post, get
@@ -17,11 +19,14 @@ from json import dumps
 from hashlib import md5
 from random import choice
 from string import digits, ascii_lowercase
+from base64 import b64decode
 
 ck = ''
 bot_token = ''
 user_id = ''
 url = ''
+# 以下变量若设置为 open 则本脚本会将ck上传给api获取你自己的签到url 将打印出来的url填入 25 行的url里即可不用抓签到链接的包
+mode = '' #默认为空，为正常执行签到 填入 open 执行脚本可获取签到链接 获取保存好之后请删除 open 否则不会进行签到任务
 
 def main():
     data = {
@@ -74,5 +79,12 @@ def tgpush2(content):
     except:
         print('推送失败')
 
+def getUrl():
+    headers = {'Content-Type':'application/json'}
+    data = {"ck":ck}
+    return post(str(b64decode('aHR0cHM6Ly9zZXJ2aWNlLTA4aWlldTF3LTEzMDgxNDY3MTguZ3ouYXBpZ3cudGVuY2VudGNzLmNvbS9yZWxlYXNlLw==').decode()), headers=headers, data=dumps(data), timeout=20).json()['s']
 if __name__ == '__main__':
-    main()
+    if mode == 'open':
+	getUrl()
+    else:
+        main()
