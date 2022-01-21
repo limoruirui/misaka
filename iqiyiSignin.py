@@ -14,7 +14,7 @@
 try:
     from requests import post, get
 except:
-    print("你还没有安装requests库，请执行pip3 install requests安装后再执行")
+    print("你还没有安装requests库，请执行pip3 install requests安装后再执行本脚本")
 from json import dumps
 from hashlib import md5
 from random import choice
