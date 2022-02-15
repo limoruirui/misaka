@@ -118,11 +118,11 @@ function checkRedNo(redNo) {
 async function genRedNo() {
     return new Promise(resolve => {
         var URL = {
-          url: 'https://act.vip.iqiyi.com/level-right/red/status?P00001=' + P00001,
+          url: 'https://act.vip.iqiyi.com/level-right/red/gen?fv=b75a9b2a7d208020&P00001=' + P00001,
         }
         $nobyda.get(URL, async function(error, response, data) {
           var obj = JSON.parse(data);
-          const redNo = obj.code === "A00000" ? obj.data[0].redNo : " "
+          const redNo = obj.code === "A00000" ? obj.data[0].redNo : ""
           if (redNo) {
             $nobyda.redNo = redNo;
             console.log(`本次生成的红包码为${redNo},正在检测合法性......`);
@@ -148,7 +148,7 @@ async function genRedNo() {
             }
 
           } else {
-            console.log("生成红包码失败,可能为您的账号未到达5级")
+            console.log(`生成红包码失败,原因是${obj.msg}`)
           }
           resolve()
         })
