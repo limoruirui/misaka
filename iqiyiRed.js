@@ -34,7 +34,7 @@ QuantumultX 远程脚本配置:
 **********************
 [task_local]
 # 爱奇艺会员天数红包领取
-0 6 1,2 * * https://raw.githubusercontent.com/limoruirui/misaka/master/iqiyiRed.js
+0 6 1 * * https://raw.githubusercontent.com/limoruirui/misaka/master/iqiyiRed.js
 [rewrite_local]
 # 获取Cookie
 ^https:\/\/passport\.iqiyi\.com\/apis\/user\/info\.action url script-request-header https://raw.githubusercontent.com/limoruirui/misaka/master/iqiyiRed.js
@@ -44,7 +44,7 @@ hostname= passport.iqiyi.com
 Surge 4.2.0+ 脚本配置:
 **********************
 [Script]
-爱奇艺会员天数红包领取 = type=cron,cronexp=0 9 * * *,timeout=120,script-path=https://raw.githubusercontent.com/limoruirui/misaka/master/iqiyiRed.js
+爱奇艺会员天数红包领取 = type=cron,cronexp=0 6 1 * *,timeout=120,script-path=https://raw.githubusercontent.com/limoruirui/misaka/master/iqiyiRed.js
 爱奇艺获取Cookie = type=http-request,pattern=^https:\/\/passport\.iqiyi\.com\/apis\/user\/info\.action,script-path=https://raw.githubusercontent.com/limoruirui/misaka/master/iqiyiRed.js
 [MITM]
 hostname= passport.iqiyi.com
@@ -53,7 +53,7 @@ Loon 2.1.0+ 脚本配置:
 ************************
 [Script]
 # 爱奇艺会员天数红包领取
-cron "0 9 * * *" script-path=https://raw.githubusercontent.com/limoruirui/misaka/master/iqiyiRed.js
+cron "0 6 1 * *" script-path=https://raw.githubusercontent.com/limoruirui/misaka/master/iqiyiRed.js
 # 获取Cookie
 http-request ^https:\/\/passport\.iqiyi\.com\/apis\/user\/info\.action script-path=https://raw.githubusercontent.com/limoruirui/misaka/master/iqiyiRed.js
 [Mitm]
@@ -83,13 +83,11 @@ var $nobyda = nobyda();
     if (cookie.includes("P00001")) {
         P00001 = cookie.match(/P00001=(.*?);/)[1];
         await login();
-        if (new Date().getDate() === 1) {
-          console.log("今天是1号，执行5级以上会员生成红包码，领取红包请在每个月1号之后再执行一次");
-          await genRedNo();
-        } else {
-          await getRed();
-          
-        }
+        var level = await getLevel();
+        if (level >= 5) {
+          console.log("您的账号等级大于5级，正在领取红包并提交红包码");
+          await genRedNo();}
+        await getRed();
         const expires = $nobyda.expire ? $nobyda.expire.replace(/\u5230\u671f/, "") : "获取失败 ⚠️"
         if (!$nobyda.isNode) $nobyda.notify("爱奇艺", "到期时间: " + expires, pushMsg.join('\n'));
         if (barkKey) await BarkNotify($nobyda, barkKey, '爱奇艺', `到期时间: ${expires}\n${pushMsg.join('\n')}`, barkServer);
@@ -110,12 +108,13 @@ function checkRedNo(redNo) {
         }
           $nobyda.get(URL, function(error, response, data) {
           var obj = JSON.parse(data);
-          const res = obj.code;
+          if (obj.code === "A00000") {
+            var res = obj.data.totalNum - obj.data.receviedNum >0 ? "A00000" : "A00001";}
+          else { var res = "A00002";}
           resolve(res);
         })
       })
 }
-
 async function genRedNo() {
     return new Promise(resolve => {
         var URL = {
@@ -134,14 +133,18 @@ async function genRedNo() {
                 var res = await postRedNo(redNo);
                 if (res === "success") {
                     console.log("已将您的红包码提交到数据库");
-                } else if (res === "repeat") {
+                } 
+                else if (res === "repeat") {
                     console.log("您的红包码已在数据库中，请勿重复提交")
-                } else {
+                } 
+                else {
                     console.log("提交红包码失败，可能为服务器网络问题，请稍后重试");
                 }
-            } else {
+            } 
+            else if (result === "A00001") {
+                console.log("本次生成的红包码已领完，暂不提交");}
+            else {
                 console.log("本次生成的红包码非法，请反馈");
-                console.log(result);
             }
 
           } else {
@@ -151,8 +154,6 @@ async function genRedNo() {
         })
       })
 }
-
-
 async function getRed() {
       const redNoList =  await getRedNo();
       var j = 0;
@@ -215,8 +216,11 @@ async function getRedNo() {
         if (obj.msg === "success") {
           const redNoList = obj.data;
           resolve(redNoList);
-        } else {
-          console.log("服务器拒绝返回红包码")
+        } 
+        else if (obj.msg === "nothing") {
+          console.log("数据库内暂时没有红包码，请之后再运行");}
+        else {
+          console.log("服务器拒绝返回红包码");
         }
       })
     })
@@ -242,7 +246,17 @@ function login() {
     })
   })
 }
-
+function getLevel() {
+  return new Promise(resolve => {
+    var URL = {
+      url: `https://tc.vip.iqiyi.com/growthAgency/growth-aggregation?messageId=b307b71ea0954cacd7b31b65c193ef58&platform=97ae2982356f69d8&P00001=${P00001}&responseNodes=duration%2Cgrowth%2Cupgrade%2CviewTime%2CgrowthAnnualCard`,
+    }
+    $nobyda.get(URL, function(error, response, data) {
+      var obj = JSON.parse(data);
+      resolve(obj.user.level);
+    })
+  })
+}
 function GetCookie() {
   if (!$request.url.includes("/apis/user/info.action")) {
     $nobyda.notify(`写入爱奇艺Cookie失败`, "", "请更新脚本配置(URL正则/MITM)");
