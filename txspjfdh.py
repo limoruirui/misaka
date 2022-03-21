@@ -77,7 +77,7 @@ def get_9list():
             continue
     tgpush('本次运行未发现积分低于10的物品')
 def get_billno(ck, ua):
-    url = f'https://vip.video.qq.com/fcgi-bin/comm_cgi?name=get_billno&cmd=61185&_={timestamp()}&callback=Zepto{timestamp()}'
+    url = f'https://vip.video.qq.com/fcgi-bin/comm_cgi?name=welfare_donate&g_vstk=1376497764&g_actk=3899139375&aid=V0%24%242%3A5%2412%3Ahlw.vmallscore%243%3A8.4.90%2434%3A1%248%3A4101&welfare_id={get_9list()}&score=1&remark=&_={timestamp()}&callback=Zepto{timestamp()}'
     Referer = f'https://film.qq.com/x/credit_mall/route/productDetail?productId={get_9list()}&ptag=hlw.vmallscore'
     billno = findall(r'"bill_no":"(.*?)",', get(url, headers=get_headers(ck, ua, Referer)).text)[0]
     return billno
