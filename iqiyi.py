@@ -242,10 +242,12 @@ class Iqiyi:
             self.print_now("签到失败，原因可能是签到接口又又又又改了")
 
     def dailyTask(self):
-        taskcodeList = {'b6e688905d4e7184': "浏览生活福利",
+        taskcodeList = {
+                        'b6e688905d4e7184': "浏览生活福利",
                         'a7f02e895ccbf416': "看看热b榜",
                         '8ba31f70013989a8': "每日观影成就",
-                        "freeGetVip": "浏览电信福利"}
+                        "freeGetVip": "浏览会员兑换活动",
+                        "GetReward": "逛领福利频道"}
         for taskcode in taskcodeList:
             # 领任务
             url = f'https://tc.vip.iqiyi.com/taskCenter/task/joinTask?P00001={self.ck}&taskCode={taskcode}&platform=b6c13e26323c537d&lang=zh_CN&app_lm=cn'
@@ -311,7 +313,6 @@ class Iqiyi:
             return
         for i in range(150):
             Time = randint(60, 120)
-            # dfp = self.uuid(66)
             url = self.getUrl(Time, self.dfp)
             self.req(url, 'other')
             totalTime += Time
@@ -339,7 +340,7 @@ class Iqiyi:
             sleep(180)
         self.get_userinfo()
         if pushplus_token != "":
-            self.pushplus(self.user_info)
+            self.pushplus("爱奇艺每日任务签到", self.user_info)
         if tgbot_token != "" and tg_userId != "":
             self.tgpush(self.user_info)
 
