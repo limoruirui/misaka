@@ -191,7 +191,7 @@ function postRedNo(redNo) {
             "RedNo": redNo,
         }
         var URL = {
-          url: "https://iqiyi.ruirui.fun/api/iqiyi/postRedNo",
+          url: "https://api.ruirui.fun/iqiyi/postRedNo",
           headers: {
             'Content-Type':'application/json'
           },
@@ -209,7 +209,7 @@ function postRedNo(redNo) {
 async function getRedNo() {
   return new Promise(resolve => {
       var URL = {
-        url: 'https://iqiyi.ruirui.fun/api/iqiyi/getRedNo',
+        url: 'https://api.ruirui.fun/iqiyi/getRedNo',
       }
       $nobyda.get(URL, function(error, response, data) {
         var obj = JSON.parse(data);
