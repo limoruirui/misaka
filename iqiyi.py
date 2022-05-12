@@ -200,7 +200,7 @@ class Iqiyi:
         if data.get("code") == 'A00000':
             self.uid = data['data']['userinfo']['pru']
         else:
-            self.print_now("请求api失败 可能是网络问题 也可能接口被玩坏了")
+            self.print_now("请求api失败 最大可能是cookie失效了 也可能是网络问题")
             exit(0)
 
     def get_watch_time(self):
