@@ -56,6 +56,8 @@ class Iqiyi:
             "Content-Type": "application/json"
         }
         self.msg = ""
+        self.redNo = ""
+        self.last_num = 0
 
     """工具"""
 
@@ -138,22 +140,7 @@ class Iqiyi:
         print(content)
         stdout.flush()
 
-    def get_dfp_params(self):
-        get_params_url = "https://api.ruirui.fun/iqiyi/get_dfp"
-        data = get(get_params_url).json()
-        return data
-
-    def get_userinfo(self):
-        url = f"https://tc.vip.iqiyi.com/growthAgency/v2/growth-aggregation?messageId={self.qyid}&platform=97ae2982356f69d8&P00001={self.ck}&responseNodes=duration%2Cgrowth%2Cupgrade%2CviewTime%2CgrowthAnnualCard&_={self.timestamp()}"
-        data = self.req(url)
-        msg = data['data']['growth']
-        try:
-            self.user_info = f"查询成功: 到期时间{msg['deadline']}\t当前等级为{msg['level']}\n\t今日获得成长值{msg['todayGrowthValue']}\t总成长值{msg['growthvalue']}\t距离下一等级还差{msg['distance']}成长值"
-            self.print_now(self.user_info)
-        except:
-            self.user_info = f"查询失败,未获取到用户信息"
-
-    """获取用户id"""
+    """获取用户会员等级"""
 
     def get_level(self):
         url = f'https://passport.iqiyi.com/apis/user/info.action?authcookie={self.ck}&fields=userinfo%2Cqiyi_vip&timeout=15000'
@@ -181,10 +168,20 @@ class Iqiyi:
         if code == "A00000":
             self.redNo = data["data"][0]["redNo"]
 
+    def last_redNo(self, redNo):
+        url = f"https://act.vip.iqiyi.com/bonus/query/queryRed?redNo={redNo}"
+        data = self.req(url)
+        if data.get("code") == "A00000":
+            last_num = data["data"]["totalNum"] - data["data"]["receivedNum"]
+            return last_num
+        else:
+            return 0
+
     def post_redNo(self):
         url = "https://api.ruirui.fun/iqiyi/postRedNo"
         body = {
-            "RedNo": self.redNo
+            "RedNo": self.redNo,
+            "last_num": self.last_num
         }
         req = post(url, json=body)
         if req.status_code == 200:
@@ -192,8 +189,10 @@ class Iqiyi:
             if data.get("data") == "success":
                 self.print_now("已将您的红包码提交到助力池")
                 self.msg += "已将您的红包码提交到助力池"
+            else:
+                self.print_now(data["data"])
         else:
-            self.print_now("提交失败, 可能为池子服务器炸了, 请携带日志反馈")
+            self.print_now("提交失败, 可能为池子服务器炸了, 请截图运行时间和日志反馈")
 
     def get_redNo(self):
         url = "https://api.ruirui.fun/iqiyi/getRedNo"
@@ -229,10 +228,14 @@ class Iqiyi:
         if int(self.level) >= 5:
             self.genRedNo()
             if len(self.redNo) == 28:
-                self.print_now(f"您的红包码为{self.redNo}, 正在尝试提交")
-                self.post_redNo()
+                self.last_num = self.last_redNo(self.redNo)
+                if self.last_num >= 0:
+                    self.print_now(f"您的红包码为{self.redNo}, 正在尝试提交")
+                    self.post_redNo()
+                else:
+                    self.print_now(f"您本月的会员红包已被领完, 不提交")
         redNo_list = self.get_redNo()
-        if len(self.redNo) == 28 and len(redNo_list) >= 6:
+        if len(self.redNo) == 28 and len(redNo_list) > 6:
             redNo_list.insert(0, self.redNo)
         self.print_now(f"本次获取到的红包码为\n{redNo_list}")
         for redNo in redNo_list:
