@@ -4,6 +4,13 @@
 # @Author : github@limoruirui https://github.com/limoruirui
 # @Time : 19/5/2022 19:48
 # -------------------------------
+"""
+1.无忧行app签到 请低调使用
+2.cookie获取方式
+    1.打开app-我的-任务中心 很多链接里(链接里 不是看headers)都有token 复制token的值填入环境变量即可 格式应该是 32位16进制数
+    2.有效期不懂
+3.cookie食用方式:只要token的值 32位16进制数 青龙运行可新建并放入到环境变量 WXY_TOKEN 中
+"""
 from json import loads, dumps
 from base64 import b64decode, b64encode
 from hashlib import md5 as md5Encode
@@ -29,6 +36,9 @@ tg_userId = environ.get("TG_USER_ID") if environ.get("TG_USER_ID") else ""
 tg_push_api = environ.get("TG_API_HOST") if environ.get("TG_API_HOST") else ""
 if token == "":
     print("未填写token 请添加环境变量 WXY_TOKEN")
+    exit(0)
+if len(token) != 32:
+    print("填写的token不对 是一个32位16进制数")
     exit(0)
 
 BLOCK_SIZE = AES.block_size
