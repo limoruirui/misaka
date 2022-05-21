@@ -252,6 +252,4 @@ class Iqiyi:
 
 if __name__ == '__main__':
     iqiyi = Iqiyi(iqy_ck)
-    # redNo_list = ['67068631ed2c9125202205012339', '92c2876edc37f926202205016418', '857bc8d1995552dd202205018989', 'f7463cd6507d6b3d202205015338', 'bc29efa178b7f804202205019131']
-    # print(iqiyi.last_redNo("bfc19a3124a00f13202205019513"))
     iqiyi.main()
