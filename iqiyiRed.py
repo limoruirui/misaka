@@ -229,7 +229,7 @@ class Iqiyi:
             self.genRedNo()
             if len(self.redNo) == 28:
                 self.last_num = self.last_redNo(self.redNo)
-                if self.last_num >= 0:
+                if self.last_num > 0:
                     self.print_now(f"您的红包码为{self.redNo}, 正在尝试提交")
                     self.post_redNo()
                 else:
