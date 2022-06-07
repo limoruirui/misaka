@@ -69,8 +69,8 @@ class Iqiyi:
             "Cookie": f"P00001={self.ck}",
             "Content-Type": "application/json"
         }
-        self.uid = ""
         self.dfp = dfp
+        self.uid = ""
         self.msg = ""
         self.user_info = ""
         self.sleep_await = environ.get("sleep_await") if environ.get("sleep_await") else 1
@@ -243,11 +243,11 @@ class Iqiyi:
 
     def dailyTask(self):
         taskcodeList = {
-                        'b6e688905d4e7184': "浏览生活福利",
-                        'a7f02e895ccbf416': "看看热b榜",
-                        '8ba31f70013989a8': "每日观影成就",
-                        "freeGetVip": "浏览会员兑换活动",
-                        "GetReward": "逛领福利频道"}
+            # 'b6e688905d4e7184': "浏览生活福利",
+            # 'a7f02e895ccbf416': "看看热b榜",
+            '8ba31f70013989a8': "每日观影成就",
+            "freeGetVip": "浏览会员兑换活动",
+            "GetReward": "逛领福利频道"}
         for taskcode in taskcodeList:
             # 领任务
             url = f'https://tc.vip.iqiyi.com/taskCenter/task/joinTask?P00001={self.ck}&taskCode={taskcode}&platform=b6c13e26323c537d&lang=zh_CN&app_lm=cn'
@@ -260,7 +260,8 @@ class Iqiyi:
                 # print(f'完成{taskcodeList[taskcode]}任务成功')
                 sleep(2)
             # 领取奖励
-            url = f'https://tc.vip.iqiyi.com/taskCenter/task/getTaskRewards?P00001={self.ck}&taskCode={taskcode}&dfp={self.dfp}&platform=b6c13e26323c537d&lang=zh_CN&app_lm=cn&deviceID={self.md5(self.uuid(8))}&token=&multiReward=1&fv=bed99b2cf5722bfe'
+            # url = f'https://tc.vip.iqiyi.com/taskCenter/task/getTaskRewards?P00001={self.ck}&taskCode={taskcode}&dfp={self.dfp}&platform=b6c13e26323c537d&lang=zh_CN&app_lm=cn&deviceID={self.md5(self.uuid(8))}&token=&multiReward=1&fv=bed99b2cf5722bfe'
+            url = f"https://tc.vip.iqiyi.com/taskCenter/task/getTaskRewards?P00001={self.ck}&taskCode={taskcode}&lang=zh_CN&platform=b2f2d9af351b8603"
             try:
                 price = self.req(url)['dataNew'][0]["value"]
                 self.print_now(f"领取{taskcodeList[taskcode]}任务奖励成功, 获得{price}点成长值")
