@@ -157,7 +157,7 @@ class Txsp_vipRed:
         url = "https://api.ruirui.fun/txsp/post_laisee_id"
         body = {
             "laisee_id": laisee_id,
-            "last_num": "1"
+            "last_num": self.lastnum
         }
         headers = {
             "Content-Type": "application/json"
@@ -200,6 +200,19 @@ class Txsp_vipRed:
             self.msg += '活动id获取失败，请检查'
             return None
 
+    def check_lastnum(self, laisee_id):
+        url = f"https://vip.video.qq.com/fcgi-bin/comm_cgi?name=spp_vipred_route_read&cmd=1&laisee_id={laisee_id}&otype=xjson&_ts={self.timestamp()}"
+        headers = {
+            "Referer": f"https://m.film.qq.com/magic-act/{self.actId}/index_index.html?ovscroll=0&page=index&isDarkMode=0&uiType=MAX",
+            "User-Agent": self.ua
+        }
+        data = get(url, headers=headers).json()
+        self.lastnum = int(data["total"]) - int(data["used"])
+        if self.lastnum == 0:
+            self.print_now("您本月的红包已被领完,暂不提交")
+            return False
+        return True
+
     def gen_laisee_id(self, actId):
         url = f'https://vip.video.qq.com/rpc/trpc.vip_red_group.vip_red_qualification.VipRedQualification/RedQualificationSend?rpc_data=%7B%22act_id%22:%22{actId}%22%7D'
         headers = {
@@ -229,9 +242,15 @@ class Txsp_vipRed:
             'User-Agent': self.ua,
             'Referer': f'https://m.film.qq.com/magic-act/{self.actId}/index_index.html?ovscroll=0&page=index&isDarkMode=0&uiType=MAX'
         }
-        data = self.session.get(url, headers=headers).text
+        data = self.session.get(url, headers=headers).json()
         self.print_now(data)
-        sleep(1)
+        if "content" in data:
+            receive_day = data["content"]
+            self.print_now(f"领取成功, 获得{receive_day}天会员, 也可能是这个月已经领过的")
+            self.msg += f"领取成功, 获得{receive_day}天会员, 也可能是这个月已经领过的"
+            sleep(1)
+        else:
+            self.print_now("领取失败,此红包码已被领完或者你本日/本周/本月已领到上限")
 
     def main(self):
         today = datetime.today().day
@@ -248,14 +267,14 @@ class Txsp_vipRed:
         if int(self.get_level()) >= 6:
             self.print_now("您当前账号大于等于6级, 领取红包码并分享")
             if self.gen_laisee_id(self.actId):
-                self.post_laisee_id(self.laisee_id)
+                if self.check_lastnum(self.laisee_id):
+                    self.post_laisee_id(self.laisee_id)
         laisee_id_list = self.get_laisee_id()
         if laisee_id_list:
             self.print_now(f"本次获取到的红包码为\n{laisee_id_list}")
             for laisee_id in laisee_id_list:
                 self.receive(laisee_id)
         self.push(self.msg)
-
 
 if __name__ == '__main__':
     Txsp_vipRed().main()
