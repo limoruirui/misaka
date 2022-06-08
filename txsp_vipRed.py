@@ -225,8 +225,12 @@ class Txsp_vipRed:
         url2 = f'https://vip.video.qq.com/fcgi-bin/comm_cgi?callback=jQuery{randint(30000000000000000000, 39999999999999999999)}_{self.timestamp()}&name=spp_vipred_route_write&cmd=1&head={self.head}&nick={self.nickname}&order_id={order_id}&_={self.timestamp()}'
         # print(url2)
         data = self.session.get(url2, headers=headers).text
-        # self.print_now(data)
-        self.laisee_id = findall(r'"laisee_id":"(.*?)",', data)[0]
+        self.print_now(data)
+        try:
+            self.laisee_id = findall(r'"laisee_id":"(.*?)",', data)[0]
+        except:
+            self.print_now("生成红包码失败, 可能是今天已经领完了, 请明天早上10点再来")
+            self.laisee_id = ""
         if self.laisee_id != "":
             self.msg += f"腾讯视频红包分享链接,https://m.film.qq.com/magic-act/{actId}/1_index_index.html?ptag=redshare&redenvelopeId={self.laisee_id}&ovscroll=0&page=index  点击链接领取几天腾讯视频会员"
             return True
@@ -278,3 +282,5 @@ class Txsp_vipRed:
 
 if __name__ == '__main__':
     Txsp_vipRed().main()
+    # test = Txsp_vipRed()
+    # test.gen_laisee_id(actId="6iuw8rky3tsid022s4rf5iauqg")
