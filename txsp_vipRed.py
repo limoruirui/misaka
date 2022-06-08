@@ -16,6 +16,7 @@
 6.推荐抓取腾讯视频app端随便一条链接的headers下的user-agent 并放入环境变量 TX_UA 中 不填写会使用随机的chrome浏览器的user-agent
 7.推送支持tgbot和pushplus 会读取环境变量 青龙若之前有设置 则不需要额外设置
 """
+from random import randint
 from time import time, sleep
 from re import findall
 from os import environ, system
@@ -207,13 +208,14 @@ class Txsp_vipRed:
         }
         data = self.session.get(url, headers=headers).json()
         order_id = data['orderid']
-        url2 = f'https://vip.video.qq.com/fcgi-bin/comm_cgi?callback=jQuery31008352113707502279_1636423447311&name=spp_vipred_route_write&cmd=1&head=https%3A%2F%2Ftvpic.gtimg.cn%2Fhead%2F053408c7084bcafd5d98078c89e38c6cc1d29fd1176fb3a8bd6b04d4e2d97f911f20c441%2F369&nick=(*%40%CE%BF%40*)%20%E5%93%87&order_id={order_id}&_={self.timestamp()}'
-        data = get(url2, headers=headers).text
-        self.print_now(data)
+        # print(order_id)
+        url2 = f'https://vip.video.qq.com/fcgi-bin/comm_cgi?callback=jQuery{randint(30000000000000000000, 39999999999999999999)}_{self.timestamp()}&name=spp_vipred_route_write&cmd=1&head={self.head}&nick={self.nickname}&order_id={order_id}&_={self.timestamp()}'
+        # print(url2)
+        data = self.session.get(url2, headers=headers).text
+        # self.print_now(data)
         self.laisee_id = findall(r'"laisee_id":"(.*?)",', data)[0]
         if self.laisee_id != "":
-            self.msg += (f"腾讯视频红包分享链接",
-                         f"https://m.film.qq.com/magic-act/{actId}/1_index_index.html?ptag=redshare&redenvelopeId={self.laisee_id}&ovscroll=0&page=index  点击链接领取几天腾讯视频会员")
+            self.msg += f"腾讯视频红包分享链接,https://m.film.qq.com/magic-act/{actId}/1_index_index.html?ptag=redshare&redenvelopeId={self.laisee_id}&ovscroll=0&page=index  点击链接领取几天腾讯视频会员"
             return True
         else:
             return False
