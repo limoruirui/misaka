@@ -243,8 +243,8 @@ class Iqiyi:
 
     def dailyTask(self):
         taskcodeList = {
-            # 'b6e688905d4e7184': "浏览生活福利",
-            # 'a7f02e895ccbf416': "看看热b榜",
+            'b6e688905d4e7184': "浏览生活福利",
+            'a7f02e895ccbf416': "看看热b榜",
             '8ba31f70013989a8': "每日观影成就",
             "freeGetVip": "浏览会员兑换活动",
             "GetReward": "逛领福利频道"}
@@ -303,6 +303,11 @@ class Iqiyi:
         if data.get("code") == 0:
             self.print_now(f'抽奖成功, 获得{data["awardName"]}')
             return data["daysurpluschance"]
+        elif data.get("code") == 3:
+            self.print_now(f"抽奖成功, 但是获得奖励信息错误, 大概率是没用的开通会员优惠券")
+            return data["daysurpluschance"]
+        else:
+            return 0
         # elif not lottery and data.get("code") == 0:
         #     return data["daysurpluschance"]
 
