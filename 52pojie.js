@@ -14,7 +14,6 @@
 //若要将cookie填在脚本里 请填在下面这行
 let pojie_cookie = "";
 
-
 const $ = API("52破解签到");
 pojie_cookie = pojie_cookie || $.read("POJIE_COOKIE");
 const chrome_version_min = 89;
@@ -47,6 +46,7 @@ if (pojie_cookie.length === 0) {
         //接任务后等待两秒钟后再执行
         await $.wait(2000);
         await check_in();
+        $.done();
     })();
 }
 
@@ -63,7 +63,7 @@ async function check_in() {
         url: "https://www.52pojie.cn/home.php?mod=task&do=draw&id=2&referer=https%3A%2F%2Fwww.52pojie.cn%2F.%2F%2Fthread-1521480-1-1.html",
         headers: headers
     }
-    let req = await $.http.put(check_in_data)
+    let req = await $.http.put(check_in_data);
     if (req.body.indexOf("您需要先登录才能继续本操作") !== -1) {
         $.notify("52破解", "", "cookie失效, 请检查");
     } else if (req.body.indexOf("不是进行中的任务") !== -1) {
