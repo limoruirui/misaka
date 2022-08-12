@@ -7,7 +7,8 @@
 """
 联通app抽奖 入口:app首页下拉 话费派送中
 1. 脚本仅供学习交流使用, 请在下载后24h内删除
-2. 环境变量说明 PHONE_NUM(必需) UNICOM_LOTTER(选填) 自行新建环境变量添加
+2. 需要第三方库 pycryptodome 支持 命令行安装 pip3 install pycryptodome或者根据自己环境自行安装
+3. 环境变量说明 PHONE_NUM(必需) UNICOM_LOTTER(选填) 自行新建环境变量添加
     PHONE_NUM 为你的手机号
     UNICOM_LOTTER 默认自动抽奖, 若不需要 则添加环境变量值为 False
     推送通知的变量同青龙 只写了tgbot(支持反代api)和pushplus
