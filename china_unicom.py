@@ -83,7 +83,7 @@ from datetime import datetime
 from hashlib import md5 as md5Encode
 from random import randint, uniform
 from os import environ
-from sys import stdout
+from sys import stdout, exit
 
 """读取环境变量"""
 phone_num = environ.get("PHONE_NUM") if environ.get("PHONE_NUM") else ""
@@ -109,6 +109,7 @@ class China_Unicom:
             "Connection": "keep-alive",
             "Referer": "https://10010.woread.com.cn/ng_woread/",
         }
+        self.fail_num = 0
 
     def timestamp(self):
         return round(time() * 1000)
@@ -190,7 +191,16 @@ class China_Unicom:
         date = datetime.today().__format__("%Y%m%d%H%M%S")
         crypt_text = f'{{"value":"947728124","timestamp":"{date}","token":"{self.userinfo["token"]}","userId":"{self.userinfo["userid"]}","userIndex":{self.userinfo["userindex"]},"userAccount":"{self.userinfo["phone"]}","verifyCode":"{self.userinfo["verifycode"]}"}}'
         for i in range(3):
-            self.print_now(self.req(url, crypt_text))
+            data = self.req(url, crypt_text)
+            self.print_now(data)
+            if self.fail_num == 3:
+                self.print_now("当前任务出现异常 且错误次数达到3次 请手动检查")
+                self.push("当前任务出现异常 且错误次数达到3次 请手动检查")
+                exit(0)
+            if data["code"] == "9999":
+                self.print_now("当前任务出现异常 正在重新执行")
+                self.fail_num += 1
+                self.main()
             sleep(uniform(2, 8))
 
     def read_novel(self):
@@ -231,6 +241,14 @@ class China_Unicom:
         crypt_text = f'{{"activeIndex":6880,"timestamp":"{date}","token":"{self.userinfo["token"]}","userId":"{self.userinfo["userid"]}","userIndex":{self.userinfo["userindex"]},"userAccount":"{self.userinfo["phone"]}","verifyCode":"{self.userinfo["verifycode"]}"}}'
         data = self.req(url, crypt_text)
         self.print_now(data)
+    def exchange(self):
+        # ticketValue activeid来自于https://10010.woread.com.cn/ng_woread_service/rest/phone/vouchers/getSysConfig get请求
+        #{"ticketValue":"300","activeid":"61yd210901","timestamp":"20220816213709","token":"","userId":"","userIndex":,"userAccount":"","verifyCode":""}
+        url = "https://10010.woread.com.cn/ng_woread_service/rest/phone/vouchers/exchange"
+        date = datetime.today().__format__("%Y%m%d%H%M%S")
+        crypt_text = f'{{"ticketValue":"300","activeid":"61yd210901","timestamp":"{date}","token":"{self.userinfo["token"]}","userId":"{self.userinfo["userid"]}","userIndex":{self.userinfo["userindex"]},"userAccount":"{self.userinfo["phone"]}","verifyCode":"{self.userinfo["verifycode"]}"}}'
+        data = self.req(url, crypt_text)
+        print(data)
     def query_red(self):
         url = "https://10010.woread.com.cn/ng_woread_service/rest/phone/vouchers/queryTicketAccount"
         date = datetime.today().__format__("%Y%m%d%H%M%S")
@@ -263,6 +281,7 @@ class China_Unicom:
                 sleep(2)
             self.query_score()
         self.query_red()
+        exit(0)
 
 
 if __name__ == "__main__":
