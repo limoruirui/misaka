@@ -126,18 +126,6 @@ class Txsp_vipRed:
         self.head = findall(r"\"head\":\"(.*?)\"", data)[0]
         self.nickname = findall(r"\"nick\":\"(.*?)\"", data)[0]
 
-    """碰了别人的则上报别人的次数+1 用于计数别人的蛋有没有碰完 暂时未使用 后续观察情况再说"""
-
-    def laisee_id_success(self, laisee_id):
-        url = "https://api.ruirui.fun/txsp/laisee_id_success"
-        body = {
-            "laisee_id": laisee_id
-        }
-        try:
-            post(url, json=body)
-        except:
-            self.print_now("上报失败")
-
     def get_laisee_id(self):
         url = "https://api.ruirui.fun/txsp/get_laisee_id"
         try:

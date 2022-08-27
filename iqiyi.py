@@ -23,7 +23,7 @@ cookie = ""
 iqiyi_dfp = ""
 from time import sleep, time
 from random import randint, choice
-from json import dumps, loads
+from json import dumps
 from hashlib import md5 as md5Encode
 from string import digits, ascii_lowercase, ascii_uppercase
 from sys import exit, stdout
@@ -201,6 +201,7 @@ class Iqiyi:
             self.uid = data['data']['userinfo']['pru']
         else:
             self.print_now("请求api失败 最大可能是cookie失效了 也可能是网络问题")
+            self.tgpush("爱奇艺每日任务: 请求api失败 最大可能是cookie失效了 也可能是网络问题")
             exit(0)
 
     def get_watch_time(self):
