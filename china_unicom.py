@@ -13,6 +13,9 @@
     UNICOM_LOTTER 默认自动抽奖, 若不需要 则添加环境变量值为 False
     推送通知的变量同青龙 只写了tgbot(支持反代api)和pushplus
 """
+"""
+updateTime: 2022.9.1  log: 每个月活动id改变更新
+"""
 import base64
 
 from cryptography.hazmat.primitives import padding
@@ -121,6 +124,7 @@ class China_Unicom:
     def md5(self, str):
         m = md5Encode(str.encode(encoding='utf-8'))
         return m.hexdigest()
+
     def pushplus(self, title, content):
         url = "http://www.pushplus.plus/send"
         headers = {
@@ -146,11 +150,13 @@ class China_Unicom:
             post(url, headers=headers, data=data, timeout=10)
         except:
             self.print_now('推送失败')
+
     def push(self, msg):
         if pushplus_token != "":
             self.pushplus("联通app大转盘", msg)
         if tgbot_token != "" and tg_userId != "":
             self.tgpush(f"联通app大转盘:\n{msg}")
+
     def req(self, url, crypt_text):
         body = {
             "sign": base64.b64encode(PrpCrypt(self.headers["accesstoken"][-16:]).encrypt(crypt_text)).decode()
@@ -158,6 +164,7 @@ class China_Unicom:
         self.headers["Content-Length"] = str(len(str(body)) - 1)
         data = post(url, headers=self.headers, json=body).json()
         return data
+
     def referer_login(self):
         date = datetime.today().__format__("%Y%m%d%H%M%S")
         timestamp = self.timestamp()
@@ -217,22 +224,31 @@ class China_Unicom:
     def query_score(self):
         url = "https://10010.woread.com.cn/ng_woread_service/rest/activity/yearEnd/queryUserScore"
         date = datetime.today().__format__("%Y%m%d%H%M%S")
-        crypt_text = f'{{"activeIndex":461,"timestamp":"{date}","token":"{self.userinfo["token"]}","userId":"{self.userinfo["userid"]}","userIndex":{self.userinfo["userindex"]},"userAccount":"{self.userinfo["phone"]}","verifyCode":"{self.userinfo["verifycode"]}"}}'
+        crypt_text = f'{{"activeIndex":{self.activeIndex},"timestamp":"{date}","token":"{self.userinfo["token"]}","userId":"{self.userinfo["userid"]}","userIndex":{self.userinfo["userindex"]},"userAccount":"{self.userinfo["phone"]}","verifyCode":"{self.userinfo["verifycode"]}"}}'
         data = self.req(url, crypt_text)
         total_score = data["data"]["validScore"]
         self.lotter_num = int(total_score / 50)
         self.print_now(f"你的账号当前有积分{total_score}, 可以抽奖{self.lotter_num}次")
 
+    def get_activetion_id(self):
+        url = "https://10010.woread.com.cn/ng_woread_service/rest/activity/yearEnd/queryActiveInfo"
+        date = datetime.today().__format__("%Y%m%d%H%M%S")
+        crypt_text = f'{{"timestamp":"{date}","token":"{self.userinfo["token"]}","userId":"{self.userinfo["userid"]}","userIndex":{self.userinfo["userindex"]},"userAccount":"{self.userinfo["phone"]}","verifyCode":"{self.userinfo["verifycode"]}"}}'
+        data = self.req(url, crypt_text)
+        if data["code"] == "0000":
+            self.activeIndex = data["data"]["activeindex"]
+        else:
+            self.print_now(f"活动id获取失败 将影响抽奖和查询积分")
+
     def lotter(self):
         url = "https://10010.woread.com.cn/ng_woread_service/rest/activity/yearEnd/handleDrawLottery"
         date = datetime.today().__format__("%Y%m%d%H%M%S")
-        crypt_text = f'{{"activeIndex":461,"timestamp":"{date}","token":"{self.userinfo["token"]}","userId":"{self.userinfo["userid"]}","userIndex":{self.userinfo["userindex"]},"userAccount":"{self.userinfo["phone"]}","verifyCode":"{self.userinfo["verifycode"]}"}}'
+        crypt_text = f'{{"activeIndex":{self.activeIndex},"timestamp":"{date}","token":"{self.userinfo["token"]}","userId":"{self.userinfo["userid"]}","userIndex":{self.userinfo["userindex"]},"userAccount":"{self.userinfo["phone"]}","verifyCode":"{self.userinfo["verifycode"]}"}}'
         data = self.req(url, crypt_text)
         if data["code"] == "0000":
             self.print_now(f"抽奖成功, 获得{data['data']['prizename']}")
         else:
             self.print_now(f"抽奖失败, 日志为{data}")
-
 
     def watch_ad(self):
         self.print_now("观看广告得话费红包: ")
@@ -241,14 +257,16 @@ class China_Unicom:
         crypt_text = f'{{"activeIndex":6880,"timestamp":"{date}","token":"{self.userinfo["token"]}","userId":"{self.userinfo["userid"]}","userIndex":{self.userinfo["userindex"]},"userAccount":"{self.userinfo["phone"]}","verifyCode":"{self.userinfo["verifycode"]}"}}'
         data = self.req(url, crypt_text)
         self.print_now(data)
+
     def exchange(self):
         # ticketValue activeid来自于https://10010.woread.com.cn/ng_woread_service/rest/phone/vouchers/getSysConfig get请求
-        #{"ticketValue":"300","activeid":"61yd210901","timestamp":"20220816213709","token":"","userId":"","userIndex":,"userAccount":"","verifyCode":""}
+        # {"ticketValue":"300","activeid":"61yd210901","timestamp":"20220816213709","token":"","userId":"","userIndex":,"userAccount":"","verifyCode":""}
         url = "https://10010.woread.com.cn/ng_woread_service/rest/phone/vouchers/exchange"
         date = datetime.today().__format__("%Y%m%d%H%M%S")
         crypt_text = f'{{"ticketValue":"300","activeid":"61yd210901","timestamp":"{date}","token":"{self.userinfo["token"]}","userId":"{self.userinfo["userid"]}","userIndex":{self.userinfo["userindex"]},"userAccount":"{self.userinfo["phone"]}","verifyCode":"{self.userinfo["verifycode"]}"}}'
         data = self.req(url, crypt_text)
         print(data)
+
     def query_red(self):
         url = "https://10010.woread.com.cn/ng_woread_service/rest/phone/vouchers/queryTicketAccount"
         date = datetime.today().__format__("%Y%m%d%H%M%S")
@@ -267,11 +285,11 @@ class China_Unicom:
                 self.print_now(f"查询成功 你当前有话费红包{can_use_red} 不足兑换的最低额度")
                 self.push(f"查询成功 你当前有话费红包{can_use_red} 不足兑换的最低额度")
 
-
     def main(self):
         self.referer_login()
         self.get_userinfo()
         self.watch_video()
+        self.get_activetion_id()
         self.read_novel()
         self.query_score()
         self.watch_ad()
