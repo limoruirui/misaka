@@ -73,5 +73,9 @@ def hmac_sha1(data, key):
 
 
 # 封装读取环境变量的方法
-def get_environ(key, default=""):
-    return environ.get(key) if environ.get(key) else default
+def get_environ(key, default="", output=True):
+    def no_read():
+        if output:
+            print_now(f"未填写环境变量 {key} 请添加")
+        return default
+    return environ.get(key) if environ.get(key) else no_read()
