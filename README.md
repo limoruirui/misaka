@@ -8,17 +8,13 @@
   ```
   // 以下几条命令 请不要带着 $/# 一起复制 这两个符号只是代表了所需权限
   $ git clone https://github.com/limoruirui/misaka
-
-
 - 安装依赖
   ```
   $ pip3 install -r requirements.txt
-
 - 然后设置环境变量 以ubuntu为例 只提供参考
   ```
   $ sudo vim /etc/profile
   写入 export key="value" 多个环境变量就写入多行
-
 - 执行脚本
   ```
   1.手动执行测试 在主目录下 执行
