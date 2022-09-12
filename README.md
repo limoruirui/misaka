@@ -1,7 +1,77 @@
 # misaka
 - 随缘维护和上传, 请不要上传或者转载到其它地方。
 - 食用方法都在脚本内,请自行查看。
-- 觉得好用可以点个star。请不要fork!!!不要fork!!!不要fork!!!
+- 觉得好用可以点个star。
+## 使用方法
+### 一. ubuntu服务器
+- 拉取整个仓库(部分文件可以单独跑)
+  ```
+  // 以下几条命令 请不要带着 $/# 一起复制 这两个符号只是代表了所需权限
+  $ git clone https://github.com/limoruirui/misaka
+
+
+- 安装依赖
+  ```
+  $ pip3 install -r requirements.txt
+
+- 然后设置环境变量 以ubuntu为例 只提供参考
+  ```
+  $ sudo vim /etc/profile
+  写入 export key="value" 多个环境变量就写入多行
+
+- 执行脚本
+  ```
+  1.手动执行测试 在主目录下 执行
+    $ python3 xxx.py >> logs/xxx.log
+  2. crontab定时任务
+    0 0 * * * . /etc/profile;cd 目录的绝对路径 && python3 xxx.py >> logs/xxx.log 2>&1
+### 二. 青龙面板
+- 拉取仓库
+  ```
+  ql repo https://github.com/limoruirui/misaka.git "" "backUp|tools|JS|logs"  "tools|JS|logs"
+  国内服务器太卡的话用下面这个
+  ql repo https://github.ruirui.fun/https://github.com/limoruirui/misaka.git "" "backUp|tools|JS|logs"  "tools|JS|logs"
+- 安装依赖
+  ```
+  安装依赖时失败时 如果日志内有提示 gcc not found 的关键字 则进入docker容器中 依次执行
+  $ apk update
+  $ apk add build-base 
+  此时在docker容器内执行 gcc --version 若正确显示版本信息 则可继续安装
+  
+  第一种方法: 在github复制requirements.txt内的所有东西 
+  打开面板-依赖管理-新建依赖 依赖类型选 python3 自动拆分选 是 把复制的东西粘贴在名称内 确定即可
+  
+  第二种方法: 进入容器中 依次执行
+  $ cd data/scripts/limoruirui_misaka
+  $ wget https://raw.githubusercontent.com/limoruirui/misaka/master/requirements.txt
+  $ pip3 install -r requirements.txt
+- 按照脚本文件内的说明设置环境变量
+## 环境变量说明
+- 一.推送
+  - 1.tgbot 
+    - TG_USER_ID  tg用户id
+    - TG_BOT_TOKEN tgbot的token
+    - TG_API_HOST(可选, 若无或不需要则不设置) tg反向代理api
+  - 2.pushplus
+    - PUSH_PLUS_TOKEN 推送加的token
+- 二.脚本内变量(具体参照脚本文件内说明)
+  - 1. 联通营业厅app(china_unicom.py)
+    - PHONE_NUM 手机号码 (必须)
+    - UNICOM_LOTTER 是否自动抽奖 (选填 True | False, 默认为是)
+  - 2. 电信营业厅app(china_telecom.py)
+    - TELECOM_PHONE 手机号码 (必须)
+  - 3. iqiyi(iqiyi.py & iqiyiRed.py)
+    - iqy_ck 爱奇艺cookie 可整段 也可只保留P00001=xxx; (必须)
+    - get_iqiyi_dfp 是否请求我的api来获取参数 再去请求爱奇艺的api来获取dfp dfp类似于设备号 cookie字段内有 (选择 True | False 默认为否)
+    - sleep_await 因观影时长同步有延迟 故建议完成任务后等待几分钟再查询 (选填 True | False 默认为是)
+  - 4. 无忧行app(wxy.py)
+    - WXY_TOKEN 无忧行app内的token (必须)
+## 文件目录说明
+- 主目录 -- 存放主文件
+- Tools -- 存放一些脚本内经常需要重复使用的工具
+- JS -- 存放一些网站自己写的 过于复杂 不好使用python重写的加解密的js文件供python调用
+- backUp -- 存放已经无法正常执行的文件
+- logs -- 存放任务日志
 ## 特别声明
 
 - 本仓库发布的脚本及其中涉及的任何解密分析脚本，仅用于测试和学习研究，禁止用于商业用途，不能保证其合法性，准确性，完整性和有效性，请根据情况自行判断。
