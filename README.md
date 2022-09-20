@@ -62,6 +62,8 @@
     - sleep_await 因观影时长同步有延迟 故建议完成任务后等待几分钟再查询 (选填 True | False 默认为是)
   - 4. 无忧行app(wxy.py)
     - WXY_TOKEN 无忧行app内的token (必须)
+  - 4. 顺丰速运(sfexpress.py)
+    - SF_SIGN 顺丰app的sign (必须)
 ## 文件目录说明
 - 主目录 -- 存放主文件
 - Tools -- 存放一些脚本内经常需要重复使用的工具
