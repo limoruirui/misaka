@@ -14,6 +14,8 @@
 """
 from datetime import date
 from json import dumps
+from time import sleep
+
 from requests import get, post
 from base64 import b64encode
 
@@ -148,7 +150,8 @@ class ChinaTelecom:
         }
         data = self.req(url, "post", body)
         # print(dumps(data, indent=2, ensure_ascii=0))
-        if data["totalDay"] == 7:
+        recordNum = data["recordNum"]
+        if recordNum != 0:
             return data["date"]["id"]
         return ""
 
@@ -162,14 +165,20 @@ class ChinaTelecom:
             "para": self.telecom_encrypt(
                 f'{{"phone":"{self.phone}","rewardId":"{rewardId}","month":"{date.today().__format__("%Y%m")}"}}')
         }
-        data = self.req(url, "post", body)
-        print_now(data)
-        if data["code"] == "0":
+        for i in range(5):
+            data = self.req(url, "post", body)
+            print_now(data)
+            if data["code"] == "0":
+                break
+            sleep(3)
+        rewardId = self.query_signinfo()
+        if rewardId == "":
             self.msg += f"账号{self.phone}连续签到7天兑换1元话费成功\n"
             print_now(self.msg)
         else:
-            self.msg += f"账号{self.phone}连续签到7天兑换1元话费失败 请查看日志\n"
+            self.msg += f"账号{self.phone}连续签到7天兑换1元话费失败 明天会继续尝试兑换\n"
             print_now(self.msg)
+
 
     # 查询金豆数量
     def coin_info(self):
