@@ -10,9 +10,10 @@
 1. 电信签到 不需要抓包 脚本仅供学习交流使用, 请在下载后24h内删除
 2. 环境变量说明:
     必须  TELECOM_PHONE : 电信手机号
+    选填  TELECOM_FOOD  : 给宠物喂食次数 默认为0 不喂食 根据用户在网时长 每天可以喂食5-9次
 3. 必须登录过 电信营业厅 app的账号才能正常运行
 """
-from datetime import date
+from datetime import date, datetime
 from json import dumps
 from time import sleep
 
@@ -25,6 +26,7 @@ from tools.tool import timestamp, get_environ, print_now
 from tools.send_msg import push
 
 phone = get_environ("TELECOM_PHONE")
+foods = get_environ("TELECOM_FOOD", 0, False)
 if phone == "":
     exit(0)
 
@@ -124,21 +126,25 @@ class ChinaTelecom:
         }
         data = self.req(url, "POST", body)
         self.level = int(data["userInfo"]["paradiseDressup"]["level"])
+        if self.level < 5:
+            print_now("当前等级小于5级 不领取等级权益")
+            return
         url = "https://wapside.189.cn:9001/jt-sign/paradise/getLevelRightsList"
         right_list = self.req(url, "POST", body)[f"V{self.level}"]
         for data in right_list:
             # print(dumps(data, indent=2, ensure_ascii=0))
-            if "00金豆" in data["righstName"]:
-                self.rightsId = data["id"]
-                break
+            if "00金豆" in data["righstName"] or "话费" in data["righstName"]:
+                rightsId = data["id"]
+                self.level_ex(rightsId)
+                continue
         # print(self.rightsId)
 
     # 每月领取等级金豆
-    def level_ex(self):
-        self.get_level()
+    def level_ex(self, rightsId):
+        # self.get_level()
         url = "https://wapside.189.cn:9001/jt-sign/paradise/conversionRights"
         data = {
-            "para": self.telecom_encrypt(f'{{"phone":{self.phone},"rightsId":"{self.rightsId}"}}')
+            "para": self.telecom_encrypt(f'{{"phone":{self.phone},"rightsId":"{rightsId}"}},"receiveCount":1')
         }
         print_now(self.req(url, "POST", data))
 
@@ -194,9 +200,12 @@ class ChinaTelecom:
         self.chech_in()
         self.get_task()
         self.do_task()
-        for i in range(7):
-            self.food()
+        if foods != 0:
+            for i in range(foods):
+                self.food()
         self.convert_reward()
+        if datetime.now().day == 1:
+            self.get_level()
         self.coin_info()
         self.msg += f"你账号{self.phone} 当前有金豆{self.coin_count['totalCoin']}"
         push("电信app签到", self.msg)

@@ -57,6 +57,7 @@
     - UNICOM_LOTTER 是否自动抽奖 (选填 True | False, 默认为是)
   - 2. 电信营业厅app(china_telecom.py)
     - TELECOM_PHONE 手机号码 (必须)
+    - TELECOM_FOOD 宠物喂食次数 (选择)
   - 3. iqiyi(iqiyi.py & iqiyiRed.py)
     - iqy_ck 爱奇艺cookie 可整段 也可只保留P00001=xxx; (必须)
     - get_iqiyi_dfp 是否请求我的api来获取参数 再去请求爱奇艺的api来获取dfp dfp类似于设备号 cookie字段内有 (选择 True | False 默认为否)
