@@ -26,7 +26,7 @@ from tools.tool import timestamp, get_environ, print_now
 from tools.send_msg import push
 
 phone = get_environ("TELECOM_PHONE")
-foods = get_environ("TELECOM_FOOD", 0, False)
+foods = int(float(get_environ("TELECOM_FOOD", 0, False)))
 if phone == "":
     exit(0)
 
