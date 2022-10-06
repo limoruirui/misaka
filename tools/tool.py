@@ -7,7 +7,7 @@
 """
 封装一些工具
 """
-from hashlib import md5 as md5Encode, sha1
+from hashlib import md5 as md5Encode, sha1 as sha1Encode
 from hmac import new
 from random import choice, randint
 from string import digits, ascii_lowercase, ascii_uppercase
@@ -61,14 +61,22 @@ def timestamp(short=False):
 
 
 # md5
-def md5(str):
-    m = md5Encode(str.encode('utf8'))
+def md5(data):
+    if isinstance(data, str):
+        data = data.encode("utf8")
+    m = md5Encode(data)
     return m.hexdigest()
 
-
+def sha1(data):
+    if isinstance(data, str):
+        data = data.encode("utf8")
+    elif isinstance(data, list):
+        data = bytes(data)
+    m = sha1Encode(data)
+    return m.hexdigest()
 # hmac sha1
 def hmac_sha1(data, key):
-    hmac_code = new(key.encode(), data.encode(), sha1)
+    hmac_code = new(key.encode(), data.encode(), sha1Encode)
     return hmac_code.hexdigest()
 
 
