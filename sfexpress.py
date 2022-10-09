@@ -17,6 +17,11 @@
     ii. 可通过 tools文件夹内的 sfExpressLogin.py 手机号验证码登录自动获取 适合不会抓包或者无法抓包
     iii. 方式二不可和app登录共存 自己登录app会顶号导致sign失效 需要登录app的话 请手动抓包
 """
+"""
+update:
+    time: 2022/10/9
+    content: 参考chavy佬(github@chavyleung https://github.com/chavyleung)之前脚本内的旧版本的任务接口, 增加三个以前的每日任务
+"""
 from requests import Session
 from json import dumps
 from tools.send_msg import push
@@ -25,6 +30,7 @@ from tools.tool import timestamp, md5, print_now, get_environ
 sign = get_environ("SF_SIGN")
 if sign == "":
     exit(0)
+
 
 class SFExpress:
     def __init__(self, sign):
@@ -53,16 +59,18 @@ class SFExpress:
         }
         req = self.session.get(login_url, headers=self.headers)
         self.referer_url = req.url
+
     def get_sign(self, timestam):
         return md5(f"token=wwesldfs29aniversaryvdld29&timestamp={timestam}&sysCode=MCS-MIMP-CORE")
+
     def wx_check_in(self):
-        #微信小程序签到
+        # 微信小程序签到
         url = "https://mcs-mimp-web.sf-express.com/mcs-mimp/integralTaskSignPlusService/automaticSignFetchPackage"
         timestam = timestamp()
         body = {
-          "channelFrom": "MINI_PROGRAM",
-          # "channelFrom" : "WEIXIN",
-          "comeFrom" : "vioin"
+            "channelFrom": "MINI_PROGRAM",
+            # "channelFrom" : "WEIXIN",
+            "comeFrom": "vioin"
         }
         headers = {
             "Host": "mcs-mimp-web.sf-express.com",
@@ -80,6 +88,7 @@ class SFExpress:
             "Connection": "keep-alive ",
         }
         print_now(self.session.post(url, headers=headers, json=body).text)
+
     def app_check_in(self):
         # url = "https://mcs-mimp-web.sf-express.com/mcs-mimp/commonPost/~memberNonactivity~integralTaskSignPlusService~getUnFetchPointAndDiscount"
         url = "https://mcs-mimp-web.sf-express.com/mcs-mimp/integralTaskSignPlusService/automaticSignFetchPackage"
@@ -105,7 +114,7 @@ class SFExpress:
         }
         print_now(self.session.post(url, headers=headers, json=body).json())
 
-    #获取任务信息 status 2 未完成 1待领取奖励 3已完成
+    # 获取任务信息 status 2 未完成 1待领取奖励 3已完成
     def get_task(self):
         url = "https://mcs-mimp-web.sf-express.com/mcs-mimp/commonPost/~memberNonactivity~integralTaskStrategyService~queryPointTaskAndSignFromES"
         # url = "https://mcs-mimp-web.sf-express.com/mcs-mimp/appTask/queryPointTaskAndSign"
@@ -126,7 +135,7 @@ class SFExpress:
             "Connection": "keep-alive ",
         }
         for i in range(1, 3):
-            body = {"channelType":f"{i}"}
+            body = {"channelType": f"{i}"}
             req = self.session.post(url, headers=headers, json=body)
             for task_msg in req.json()["obj"]["taskTitleLevels"]:
                 task_title = task_msg["title"]
@@ -143,9 +152,11 @@ class SFExpress:
                     self.exchange_task(task_strategyId, task_id, task_code)
                 elif task_status == 3:
                     print("当前任务已完成")
+
     def finish_task(self, task_code):
         url = f"https://mcs-mimp-web.sf-express.com/mcs-mimp/task/finishTask?id={task_code}"
         print_now(self.session.get(url, headers=self.headers).json())
+
     def exchange_task(self, strategyId, task_id, task_code):
         url = "https://mcs-mimp-web.sf-express.com/mcs-mimp/commonPost/~memberNonactivity~integralTaskStrategyService~fetchIntegral"
         timestam = timestamp()
@@ -160,12 +171,13 @@ class SFExpress:
             "signature": self.get_sign(timestam),
             "Content-Type": "application/json;charset=utf-8",
             "Origin": "https://mcs-mimp-web.sf-express.com",
-            "User-Agent": "Mozilla/5.0 (iPad; CPU OS 15_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.26(0x18001a29) NetType/WIFI Language/zh_CN miniProgram/wxd4185d00bf7e08ac ",
+            "User-Agent": "Mozilla/5.0 (iPad; CPU OS 15_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.26(0x18001a29) NetType/WIFI Language/zh_CN miniProgram/wxd4185d00bf7e08ac",
             "Referer": self.referer_url,
             "Content-Length": str(len(dumps(body).replace(" ", ""))),
             "Connection": "keep-alive ",
         }
         print_now(self.session.post(url, headers=headers, json=body).json())
+
     def query_score(self):
         url = "https://mcs-mimp-web.sf-express.com/mcs-mimp/member/points/balance"
         body = {}
@@ -180,7 +192,7 @@ class SFExpress:
             "signature": self.get_sign(timestam),
             "Content-Type": "application/json;charset=utf-8",
             "Origin": "https://mcs-mimp-web.sf-express.com",
-            "User-Agent": "Mozilla/5.0 (iPad; CPU OS 15_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.26(0x18001a29) NetType/WIFI Language/zh_CN miniProgram/wxd4185d00bf7e08ac ",
+            "User-Agent": "Mozilla/5.0 (iPad; CPU OS 15_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.26(0x18001a29) NetType/WIFI Language/zh_CN miniProgram/wxd4185d00bf7e08ac",
             "Referer": self.referer_url,
             "Content-Length": str(len(dumps(body).replace(" ", ""))),
             "Connection": "keep-alive ",
@@ -189,12 +201,53 @@ class SFExpress:
         total_score = data["obj"]["availablePoints"]
         print_now(f"您当前账号共有积分{total_score}")
         push("顺丰签到", f"您当前账号共有积分{total_score}")
+
+    def old_daily_task(self):
+        # url = "https://mcs-mimp-web.sf-express.com/mcs-mimp/appTask/queryPointTaskAndSign"
+        # body = {"channel":"SFAPP","pageType": "APP_MINE_TASK"}
+        # data = self.session.post(url, json=body).json()
+        # print(data)
+        # pageType_list = data["obj"]["taskTitleLevels"]
+        pageType_list = ["packageProcess", "scanPointMarket", "scanMemberEquity"]
+        for pageType in pageType_list:
+            self.do_old_task(pageType)
+            self.old_task_exchange(pageType)
+
+    def do_old_task(self, pageType):
+        url = "https://mcs-mimp-web.sf-express.com/mcs-mimp/appTask/scanPageToRecord"
+        body = {"channel": "SFAPP", "pageType": pageType}
+        timestam = timestamp()
+        self.old_headers = {
+            "Host": "mcs-mimp-web.sf-express.com",
+            "Accept": "application/json, text/plain, */*",
+            "timestamp": str(timestam),
+            "sysCode": "MCS-MIMP-CORE",
+            "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "signature": self.get_sign(timestam),
+            "Content-Type": "application/json;charset=utf-8",
+            "Origin": "https://mcs-mimp-web.sf-express.com",
+            "User-Agent": "Mozilla/5.0 (iPad; CPU OS 15_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.26(0x18001a29) NetType/WIFI Language/zh_CN miniProgram/wxd4185d00bf7e08ac",
+            "Referer": self.referer_url,
+            "Content-Length": str(len(dumps(body).replace(" ", ""))),
+            "Connection": "keep-alive ",
+        }
+        self.session.post(url, headers=self.old_headers, json=body)
+
+    def old_task_exchange(self, pageType):
+        url = "https://mcs-mimp-web.sf-express.com/mcs-mimp/appTask/fetchPoint"
+        body = {"channel": "SFAPP", "pageType": pageType}
+        print_now(self.session.post(url, headers=self.old_headers, json=body).json())
+
     def main(self):
         self.refersh_cookie()
         # self.wx_check_in()
         self.app_check_in()
         self.get_task()
+        self.old_daily_task()
         self.query_score()
+
+
 if __name__ == "__main__":
     sf = SFExpress(sign)
     sf.main()
