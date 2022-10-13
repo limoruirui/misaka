@@ -49,8 +49,10 @@
     - TG_USER_ID  tg用户id
     - TG_BOT_TOKEN tgbot的token
     - TG_API_HOST(可选, 若无或不需要则不设置) tg反向代理api
+    - TG_BOT_TOKEN_ADDED (可选) 用于设置额外的tgbot的token 填写此变量后 则不会再去读取TG_BOT_TOKEN 当填写了TG_BOT_TOKEN 又不希望脚本使用tg推送时 则将TG_BOT_TOKEN_ADDED设置为 no
   - 2.pushplus
     - PUSH_PLUS_TOKEN 推送加的token
+    - PUSH_PLUS_TOKEN_ADDED (可选) 同上面的TG_BOT_TOKEN_ADDED
 - 二.脚本内变量(具体参照脚本文件内说明)
   - 1. 联通营业厅app(china_unicom.py)
     - PHONE_NUM 手机号码 (必须)
