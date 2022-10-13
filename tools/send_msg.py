@@ -11,9 +11,9 @@ path.append("./tools")
 from tool import get_environ
 
 tg_userId = get_environ("TG_USER_ID", "", False)
-tgbot_token = get_environ("TG_BOT_TOKEN", "", False)
+tgbot_token = get_environ("TG_BOT_TOKEN_ADDED", "", False) if get_environ("TG_BOT_TOKEN_ADDED", "", False) else get_environ("TG_BOT_TOKEN", "", False)
 tg_push_api = get_environ("TG_API_HOST", "", False)
-pushplus_token = get_environ("PUSH_PLUS_TOKEN", "", False)
+pushplus_token = get_environ("PUSH_PLUS_TOKEN_ADDED", "", False) if get_environ("PUSH_PLUS_TOKEN_ADDED", "", False) else get_environ("PUSH_PLUS_TOKEN", "", False)
 
 def tgpush(title, content):
     url = f"https://api.telegram.org/bot{tgbot_token}/sendMessage"
@@ -40,7 +40,7 @@ def pushplus(title, content):
     except:
         print('推送失败')
 def push(title, content):
-    if pushplus_token != "":
+    if pushplus_token != "" and pushplus_token != "no":
         pushplus(title, content)
-    if tgbot_token != "" and tg_userId != "":
+    if tgbot_token != "" and tgbot_token != "no" and tg_userId != "":
         tgpush(title, content)
