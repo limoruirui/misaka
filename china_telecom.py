@@ -44,6 +44,7 @@ if password == "":
 class ChinaTelecom:
     def __init__(self, account, pwd):
         self.phone = account
+        self.ticket = ""
         if pwd != "":
             self.ticket = TelecomLogin(account, pwd).main()
 
