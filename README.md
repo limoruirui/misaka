@@ -25,9 +25,9 @@
 ### 二. 青龙面板
 - 拉取仓库
   ```
-  ql repo https://github.com/limoruirui/misaka.git "" "backUp|tools|JS|logs"  "tools|JS|logs"
+  ql repo https://github.com/limoruirui/misaka.git "" "backUp|tools|JS|logs|login"  "tools|JS|logs|login"
   国内服务器太卡的话用下面这个
-  ql repo https://github.ruirui.fun/https://github.com/limoruirui/misaka.git "" "backUp|tools|JS|logs"  "tools|JS|logs"
+  ql repo https://github.ruirui.fun/https://github.com/limoruirui/misaka.git "" "backUp|tools|JS|logs|login"  "tools|JS|logs|login"
 - 安装依赖
   ```
   安装依赖时失败时 如果日志内有提示 gcc not found 的关键字 则进入docker容器中 依次执行
@@ -43,7 +43,7 @@
   $ wget https://raw.githubusercontent.com/limoruirui/misaka/master/requirements.txt
   $ pip3 install -r requirements.txt
 - 按照脚本文件内的说明设置环境变量
-## 环境变量说明
+## 环境变量说明 
 - 一.推送
   - 1.tgbot 
     - TG_USER_ID  tg用户id
@@ -53,12 +53,13 @@
   - 2.pushplus
     - PUSH_PLUS_TOKEN 推送加的token
     - PUSH_PLUS_TOKEN_ADDED (可选) 同上面的TG_BOT_TOKEN_ADDED
-- 二.脚本内变量(具体参照脚本文件内说明)
+- 二.脚本内变量 (**<big>具体参照脚本文件内的说明</big>**)
   - 1. 联通营业厅app(china_unicom.py)
     - PHONE_NUM 手机号码 (必须)
     - UNICOM_LOTTER 是否自动抽奖 (选填 True | False, 默认为是)
   - 2. 电信营业厅app(china_telecom.py)
     - TELECOM_PHONE 手机号码 (必须)
+    - TELECOM_PASSWORD 电信服务密码 (选择)
     - TELECOM_FOOD 宠物喂食次数 (选择)
   - 3. iqiyi(iqiyi.py & iqiyiRed.py)
     - iqy_ck 爱奇艺cookie 可整段 也可只保留P00001=xxx; (必须)
