@@ -89,12 +89,12 @@ class TelecomLogin:
         # print("secret: " + secret_ticket)
         ticket = self.decrypt_ticket(secret_ticket)
         # print("ticket: " + ticket)
-        return ticket
+        return ticket, self.token
     def main(self):
         if self.login() is None:
-            return "10086"
-        ticket = self.get_ticket()
-        return ticket
+            return "", ""
+        userLoginInfo = self.get_ticket()
+        return userLoginInfo
     @staticmethod
     def get_phoneNum(phone):
         result = ""
