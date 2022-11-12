@@ -15,7 +15,11 @@ aes加密解密工具 目前仅支持ECB/CBC 块长度均为128位 padding只支
 pycryptdemo限制 同一个aes加密对象不能即加密又解密 所以当加密和解密都需要执行时 需要重新new一个对象增加额外开销
  -- A cipher object is stateful: once you have encrypted a message , you cannot encrypt (or decrypt) another message using the same object.　
 """
-from Crypto.Cipher import AES, DES, DES3
+try:
+    from Crypto.Cipher import AES, DES, DES3
+except:
+    print("检测到还未安装 pycryptdemo 请按照md的方法安装")
+    exit(0)
 from binascii import b2a_hex, a2b_hex
 from base64 import b64encode, b64decode
 

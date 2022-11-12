@@ -4,8 +4,12 @@
 # @Author : github@limoruirui https://github.com/limoruirui
 # @Time : 2022/8/23 13:05
 # -------------------------------
-from Crypto.PublicKey.RSA import importKey, construct
-from Crypto.Cipher import PKCS1_v1_5
+try:
+    from Crypto.PublicKey.RSA import importKey, construct
+    from Crypto.Cipher import PKCS1_v1_5
+except:
+    print("检测到还未安装 pycryptdemo 请按照md的方法安装")
+    exit(0)
 from base64 import b64encode
 
 
