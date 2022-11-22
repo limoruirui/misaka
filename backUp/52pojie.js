@@ -13,7 +13,6 @@
 * 4. 脚本有风险,使用需谨慎.*/
 //若要将cookie填在脚本里 请填在下面这行
 let pojie_cookie = "";
-
 const $ = API("52破解签到");
 pojie_cookie = pojie_cookie || $.read("POJIE_COOKIE");
 const chrome_version_min = 89;
@@ -21,12 +20,12 @@ const chrome_version_max = 103;
 const chrome_version = Math.floor(Math.random() * (chrome_version_max - chrome_version_min)) + chrome_version_min;
 const headers = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "Accept-Encoding": "gzip, deflate, br",
     "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,zh-TW;q=0.7",
     "Cache-Control": "no-cache",
     "Connection": "keep-alive",
     "Cookie": pojie_cookie,
     "Host": "www.52pojie.cn",
+    "Content-Type": "text/plain;charset=UTF-8",
     "Pragma": "no-cache",
     "sec-ch-ua": `".Not/A)Brand";v="99", "Google Chrome";v="${chrome_version}", "Chromium";v="${chrome_version}"`,
     "sec-ch-ua-mobile": "?0",
