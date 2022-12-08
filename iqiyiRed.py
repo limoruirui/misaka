@@ -178,7 +178,7 @@ class Iqiyi:
             return 0
 
     def post_redNo(self):
-        url = "https://api.ruirui.fun/iqiyi/postRedNo"
+        url = "https://api.limoruirui.com/iqiyi/postRedNo"
         body = {
             "RedNo": self.redNo,
             "last_num": self.last_num
@@ -195,7 +195,7 @@ class Iqiyi:
             self.print_now("提交失败, 可能为池子服务器炸了, 请截图运行时间和日志反馈")
 
     def get_redNo(self):
-        url = "https://api.ruirui.fun/iqiyi/getRedNo"
+        url = "https://api.limoruirui.com/iqiyi/getRedNo"
         req = get(url)
         if req.status_code == 200:
             data = req.json()

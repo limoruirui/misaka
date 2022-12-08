@@ -151,7 +151,7 @@ class Iqiyi:
         stdout.flush()
 
     def get_dfp_params(self):
-        get_params_url = "https://api.ruirui.fun/iqiyi/get_dfp"
+        get_params_url = "https://api.lomoruirui.com/iqiyi/get_dfp"
         data = get(get_params_url).json()
         return data
 
