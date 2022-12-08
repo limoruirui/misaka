@@ -33,7 +33,7 @@
   ```
   ql repo https://github.com/limoruirui/misaka.git "" "backUp|tools|JS|logs|login"  "tools|JS|logs|login"
   国内服务器太卡的话用下面这个
-  ql repo https://github.ruirui.fun/https://github.com/limoruirui/misaka.git "" "backUp|tools|JS|logs|login"  "tools|JS|logs|login"
+  ql repo https://github.limoruirui.com/https://github.com/limoruirui/misaka.git "" "backUp|tools|JS|logs|login"  "tools|JS|logs|login"
 - 安装依赖
   ```
   安装依赖时失败时 如果日志内有提示 gcc not found 的关键字 则进入docker容器中 依次执行
@@ -49,6 +49,10 @@
   $ wget https://raw.githubusercontent.com/limoruirui/misaka/master/requirements.txt
   $ pip3 install -r requirements.txt
 - 按照脚本文件内的说明设置环境变量
+## 常见异常说明
+### 1. no module name "tools" 未按要求拉库 看md说明 根据自己环境拉
+### 2. no module name "tools.xxx" 则将python3中的tools依赖删除
+### 3. 运行时出现 sslError 之类的提示 则为自己网络问题
 ## 环境变量说明 
 - 一.推送
   - 1.tgbot 
