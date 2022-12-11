@@ -18,7 +18,7 @@ pycryptdemo限制 同一个aes加密对象不能即加密又解密 所以当加�
 try:
     from Crypto.Cipher import AES, DES, DES3
 except:
-    print("检测到还未安装 pycryptdemo 请按照md的方法安装")
+    print("检测到还未安装 pycryptdome 请按照md的方法安装")
     exit(0)
 from binascii import b2a_hex, a2b_hex
 from base64 import b64encode, b64decode
