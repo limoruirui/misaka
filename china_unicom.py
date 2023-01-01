@@ -13,7 +13,7 @@
 3. 环境变量说明 PHONE_NUM(必需) UNICOM_LOTTER(选填) UNICOM_USERAGENT(选填) 自行新建环境变量添加
     PHONE_NUM 为你的手机号
     UNICOM_LOTTER 默认自动抽奖, 若不需要 则添加环境变量值为 False
-    UNICOM_USERAGENT 联通app的useragent 随便一个数据包的请求头里应该都有 建议自己抓一个填上 不填也能跑
+    UNICOM_USERAGENT 联通app的useragent 随便一个数据包的请求头里应该都有 建议自己抓一个填上 不填也能跑 数据内容参考 line 44 双引号的内容
     推送通知的变量同青龙 只写了tgbot(支持反代api)和pushplus
 """
 """updateTime: 2023.1.1  log: 更新aes加密key
@@ -235,7 +235,7 @@ class China_Unicom:
                 push("某通阅读", f"查询成功 你当前有话费红包{can_use_red} 不足兑换的最低额度")
 
     def main(self):
-        # self.referer_login()
+        self.referer_login()
         self.get_userinfo()
         if not self.watch_video():
             return
