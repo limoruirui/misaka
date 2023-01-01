@@ -126,7 +126,7 @@ class China_Unicom:
         self.get_cardid()
         self.get_cntindex()
         self.get_chapterallindex()
-        self.print_now("正在执行观看150次小说, 此过程较久, 最大时长为150 * 8s = 20min")
+        self.print_now(f"{self.phone_num} ：正在执行观看150次小说, 此过程较久, 最大时长为150 * 8s = 20min")
         for i in range(150):
             date = datetime.today().__format__("%Y%m%d%H%M%S")
             chapterAllIndex = choice(self.chapterallindex_list)
@@ -150,7 +150,7 @@ class China_Unicom:
         data = self.req(url, crypt_text)
         total_score = data["data"]["validScore"]
         self.lotter_num = int(total_score / 50)
-        self.print_now(f"你的账号当前有积分{total_score}, 可以抽奖{self.lotter_num}次")
+        self.print_now(f"{self.phone_num} 当前有积分{total_score}, 可以抽奖{self.lotter_num}次")
 
     def get_activetion_id(self):
         url = "https://10010.woread.com.cn/ng_woread_service/rest/activity/yearEnd/queryActiveInfo"
@@ -228,11 +228,11 @@ class China_Unicom:
         if data["code"] == "0000":
             can_use_red = data["data"]["usableNum"] / 100
             if can_use_red >= 3:
-                self.print_now(f"查询成功 你当前有话费红包{can_use_red} 可以去兑换了")
-                push("某通阅读", f"查询成功 你当前有话费红包{can_use_red} 可以去兑换了")
+                self.print_now(f"查询成功 {self.phone_num} 当前有话费红包{can_use_red} 可以去兑换了")
+                push("某通阅读", f"查询成功 {self.phone_num} 当前有话费红包{can_use_red} 可以去兑换了")
             else:
-                self.print_now(f"查询成功 你当前有话费红包{can_use_red} 不足兑换的最低额度")
-                push("某通阅读", f"查询成功 你当前有话费红包{can_use_red} 不足兑换的最低额度")
+                self.print_now(f"查询成功 {self.phone_num} 当前有话费红包{can_use_red} 不足兑换的最低额度")
+                push("某通阅读", f"查询成功 {self.phone_num} 当前有话费红包{can_use_red} 不足兑换的最低额度")
 
     def main(self):
         self.referer_login()
