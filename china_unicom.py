@@ -67,13 +67,22 @@ class China_Unicom:
         m = md5Encode(str.encode(encoding='utf-8'))
         return m.hexdigest()
 
-    def req(self, url, crypt_text):
-        body = {
-            "sign": b64encode(Crypt(crypt_type="AES", key="update!@#1234567", iv="16-Bytes--String", mode="CBC").encrypt(crypt_text).encode()).decode()
-        }
-        self.headers["Content-Length"] = str(len(dumps(body).replace(" ", "")))
-        data = post(url, headers=self.headers, json=body).json()
-        return data
+    def req(self, url, crypt_text, retry_num=5):
+        while retry_num > 0:
+            body = {
+                "sign": b64encode(Crypt(crypt_type="AES", key="update!@#1234567", iv="16-Bytes--String", mode="CBC").encrypt(crypt_text).encode()).decode()
+            }
+            self.headers["Content-Length"] = str(len(dumps(body).replace(" ", "")))
+            try:
+                res = post(url, headers=self.headers, json=body)
+                data = res.json()
+                return data
+            except Exception as e:
+                print(f"本次请求失败, 正在重新发送请求 剩余次数{retry_num}")
+                print(f"本次请求失败原因------{e}")
+                retry_num -= 1
+                sleep(5)
+                return self.req(url, crypt_text, retry_num)
 
     def referer_login(self):
         date = datetime.today().__format__("%Y%m%d%H%M%S")
