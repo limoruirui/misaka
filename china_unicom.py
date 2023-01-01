@@ -10,12 +10,13 @@
 联通app抽奖 入口:联通app 搜索 阅读专区 进入话费派送中
 1. 脚本仅供学习交流使用, 请在下载后24h内删除
 2. 需要第三方库 pycryptodome 支持 命令行安装 pip3 install pycryptodome或者根据自己环境自行安装
-3. 环境变量说明 PHONE_NUM(必需) UNICOM_LOTTER(选填) 自行新建环境变量添加
+3. 环境变量说明 PHONE_NUM(必需) UNICOM_LOTTER(选填) UNICOM_USERAGENT(选填) 自行新建环境变量添加
     PHONE_NUM 为你的手机号
     UNICOM_LOTTER 默认自动抽奖, 若不需要 则添加环境变量值为 False
+    UNICOM_USERAGENT 联通app的useragent 随便一个数据包的请求头里应该都有 建议自己抓一个填上 不填也能跑
     推送通知的变量同青龙 只写了tgbot(支持反代api)和pushplus
 """
-"""
+"""updateTime: 2023.1.1  log: 更新aes加密key
 updateTime: 2022.12.1  log: 活动重新上架 改用 pycryptodome 替代 cryptography 进行aes加密
 updateTime: 2022.9.1  log: 每个月活动id改变更新
 """
@@ -40,6 +41,8 @@ from tools.tool import get_environ, random_sleep
 class China_Unicom:
     def __init__(self, phone_num):
         self.phone_num = phone_num
+        default_ua = f"Mozilla/5.0 (Linux; Android {randint(8, 13)}; SM-S908U Build/TP1A.220810.014; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/{randint(95, 108)}.0.5359.128 Mobile Safari/537.36; unicom{{version:android@9.0{randint(0,6)}00,desmobile:{self.phone_num}}};devicetype{{deviceBrand:,deviceModel:}};{{yw_code:}}"
+        run_ua = get_environ(key="UNICOM_USERAGENT", default=default_ua, output=False)
         self.headers = {
             "Host": "10010.woread.com.cn",
             "Accept": "application/json, text/plain, */*",
@@ -47,7 +50,7 @@ class China_Unicom:
             "Accept-Encoding": "gzip, deflate, br",
             "Content-Type": "application/json;charset=utf-8",
             "Origin": "https://10010.woread.com.cn",
-            "User-Agent": f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{randint(89, 103)}.0.{randint(100, 999)}.{randint(100, 999)} Safari/537.36",
+            "User-Agent": run_ua,
             "Connection": "keep-alive",
             "Referer": "https://10010.woread.com.cn/ng_woread/",
         }
@@ -66,7 +69,7 @@ class China_Unicom:
 
     def req(self, url, crypt_text):
         body = {
-            "sign": b64encode(Crypt(crypt_type="AES", key=self.headers["accesstoken"][-16:], iv="16-Bytes--String", mode="CBC").encrypt(crypt_text).encode()).decode()
+            "sign": b64encode(Crypt(crypt_type="AES", key="update!@#1234567", iv="16-Bytes--String", mode="CBC").encrypt(crypt_text).encode()).decode()
         }
         self.headers["Content-Length"] = str(len(dumps(body).replace(" ", "")))
         data = post(url, headers=self.headers, json=body).json()
@@ -232,7 +235,7 @@ class China_Unicom:
                 push("某通阅读", f"查询成功 你当前有话费红包{can_use_red} 不足兑换的最低额度")
 
     def main(self):
-        self.referer_login()
+        # self.referer_login()
         self.get_userinfo()
         if not self.watch_video():
             return
