@@ -67,6 +67,7 @@
   - 1. 联通营业厅app(china_unicom.py)
     - PHONE_NUM 手机号码 (必须)
     - UNICOM_LOTTER 是否自动抽奖 (选填 True | False, 默认为是)
+    - UNICOM_USERAGENT 联通的useragent (选填 具体的useragnet 抓包获得)
   - 2. 电信营业厅app(china_telecom.py)
     - TELECOM_PHONE 手机号码 (必须)
     - TELECOM_PASSWORD 电信服务密码 (选择)
