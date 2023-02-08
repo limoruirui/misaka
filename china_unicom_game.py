@@ -13,6 +13,8 @@
 4. 环境变量 UNICOM_GAME_ACCOUNT_INFO 格式 某通手机号#appid#token_online
     appid可抓包获取 安卓也有不抓包的方法 自行搜索
     token_online 抓包获取 搜索 mobileService/onLine 切换账号可触发此数据包 此数据包包含 token_online和appid
+    login文件夹内有短信验证码登录(经过几天的反馈测试 不一定能用 有人可以有人不行 暂未知道原因) 抄自小一佬 github@https://github.com/xream 感谢
+    默认不添加新crontab 需要手动新建 task limoruirui_misaka/login/unicom_login.py
 5. 特别说明
     i.第一次运行会因为没有积分而无法进行积分抽奖 可再运行一次或者等第二天再抽奖即可 目前场次不多 不会每天都抽
     ii. 兑换话费已写 但未调用 有需要自行修改调用
@@ -25,10 +27,10 @@ from tools.send_msg import push
 from uuid import uuid4
 
 class CUG:
-    def __init__(self, phone, appid, token_online):
-        self.phone_num = phone
-        self.appId = appid
-        self.token_online = token_online
+    def __init__(self, phone: str, appid: str, token_online: str):
+        self.phone_num = phone.rstrip("\n")
+        self.appId = appid.rstrip("\n")
+        self.token_online = token_online.rstrip("\n")
         default_ua = f"Mozilla/5.0 (Linux; Android {randint(8, 13)}; SM-S908U Build/TP1A.220810.014; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/{randint(95, 108)}.0.5359.128 Mobile Safari/537.36; unicom{{version:android@9.0{randint(0, 6)}00,desmobile:{self.phone_num}}};devicetype{{deviceBrand:,deviceModel:}};{{yw_code:}}"
         self.run_ua = get_environ(key="UNICOM_USERAGENT", default=default_ua, output=False)
         self.deviceId = uuid4().hex
@@ -205,7 +207,7 @@ class CUG:
         sleep(5)
         now_score = self.init()
         today_score = now_score - old_score
-        self.msg += f"账号{self.phone_num}---今日获得{today_score}分, 当前共有{now_score}分\n"
+        self.msg += f"账号{self.phone_num}---本次运行获得{today_score}分, 当前共有{now_score}分\n"
         push("某通畅游", self.msg)
 if __name__ == '__main__':
     unicom_game_info = get_environ("UNICOM_GAME_ACCOUNT_INFO")
