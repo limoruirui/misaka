@@ -8,16 +8,16 @@
 # -------------------------------
 """
 某通短信登录获取online_token 抄自 小一佬 github@https://github.com/xream 感谢
-1. 建议获取本机appid 新建环境变量 CHINA_UNICOM_APPID 填入本机appid再使用 获取方法搜索引擎自行搜索
+1. 此登录脚本只提供另一种方案 建议还是自己抓包 不会有顶号导致无效的问题
 2. 因青龙面板无法进行控制台交互 故设置了两种运行方式
     i.面板内新建任务 直接运行按提示增加环境变量即可
     ii.docker容器内运行 进入login文件夹内 输入命令 (python3 unicom_login.py 114514)(不要带着括号) 按提示输入对应的东西回车即可
-3. 若未填本机appid 脚本会生成随机的 但经热心群友测试反馈 不一定能用 也有能用的 若不能用 尝试将脚本输出的appid换成本机的appid 有群友这样操作可以正常使用
-4. 此登录脚本只提供另一种方案 建议还是自己抓包 不会有顶号导致无效的问题
+3. 第一次运行会登录获取appid(此过程顶号) CHINA_UNICOM_APPID 有合法的appid时 则执行登录获取online_token(此过程不会顶号)
 """
 from requests import post
 from urllib.parse import quote
 from time import sleep
+from datetime import datetime
 from uuid import uuid4
 from sys import path, argv
 path.append("../tools")
@@ -27,8 +27,13 @@ class UnicomLogin:
     rsa_key = "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDc+CZK9bBA9IU+gZUOc6FUGu7y\nO9WpTNB0PzmgFBh96Mg1WrovD1oqZ+eIF4LjvxKXGOdI79JRdve9NPhQo07+uqGQ\ngE4imwNnRx7PFtCRryiIEcUoavuNtuRVoBAm6qdB0SrctgaqGfLgKvZHOnwTjyNq\njBUxzMeQlEC2czEMSwIDAQAB\n-----END PUBLIC KEY-----"
     def __init__(self, account, run_mode):
         self.account = account
-        interim_appid = get_environ("CHINA_UNICOM_APPID", output=False)
-        self.appid = "".join([uuid4().hex for i in range(5)]) if len(interim_appid) != 160 else interim_appid
+        interim_appid = str(get_environ("CHINA_UNICOM_APPID", output=False)).rstrip("\n")
+        self.appid = "ChinaunicomMobileBusiness" if len(interim_appid) != 160 else interim_appid
+        self.run_data = "token"
+        if self.appid == "ChinaunicomMobileBusiness":
+            print_now("检测到未填写正确的appid到环境变量 CHINA_UNICOM_APPID 中 当前执行获取appid")
+            self.run_data = "appid"
+        self.deviceId = uuid4().hex
         self.run_mode = run_mode
     def send_sms_code(self):
         url = "https://m.client.10010.com/mobileService/sendRadomNum.htm"
@@ -45,22 +50,27 @@ class UnicomLogin:
                 return
             print_now("请5分钟内新建环境变量 UNICOM_SMS 值为收到的四位数短信验证码 然后再次运行")
 
-
     def login(self, captcha):
         url = "https://m.client.10010.com/mobileService/radomLogin.htm"
-        body = f"mobile={quote(RSA_Encrypt(UnicomLogin.rsa_key).encrypt(self.account, b64=True))}&version=android%4010.0100&password={quote(RSA_Encrypt(UnicomLogin.rsa_key).encrypt(captcha, b64=True))}&appId={self.appid}"
+        body = f"deviceOS=android13&mobile={quote(RSA_Encrypt(UnicomLogin.rsa_key).encrypt(self.account, b64=True))}&netWay=Wifi&version=android%4010.0100&deviceId={self.deviceId}&password={quote(RSA_Encrypt(UnicomLogin.rsa_key).encrypt(captcha, b64=True))}&keyVersion=&provinceChanel=general&appId={self.appid}&deviceModel=V1936A&androidId={uuid4().hex[8:24]}&deviceBrand=&timestamp={datetime.today().__format__('%Y%m%d%H%M%S')}"
+        if self.run_data == "appid":
+            body += f"&deviceCode={self.deviceId}"
         headers = {
             "user-agent": "Dalvik/2.1.0 (Linux; U; Android 13; SM-S908U Build/TP1A.220624.014);unicom{version:android@10.0100}",
             "content-type": "application/x-www-form-urlencoded"
         }
         data = post(url, headers=headers, data=body).json()
-        print(data)
+        # print(data)
         if "token_online" in data:
             print("登录获取数据成功")
-            print(f"请设置环境变量 UNICOM_GAME_ACCOUNT_INFO 为 {self.account}#{self.appid}#{data['token_online']}")
+            if self.run_data == "appid":
+                print(
+                    f"请设置环境变量 CHINA_UNICOM_APPID 为 {data['appId']} 然后到app正常登录 再执行一次本脚本获取token")
+            else:
+                print(f"请设置环境变量 UNICOM_GAME_ACCOUNT_INFO 为 {self.account}#{self.appid}#{data['token_online']}")
     def main(self):
-        print_now("如果不是刚刚获取已经运行获取验证码 请先将 UNICOM_SMS 删除或者清空")
-        if len(argv) == 1:
+        if self.run_mode == "ql":
+            print_now("如果不是刚刚获取已经运行获取验证码 请先将 UNICOM_SMS 删除或者清空")
             captcha = get_environ("UNICOM_SMS", output=False)
             if len(captcha) < 4:
                 self.send_sms_code()
