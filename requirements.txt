@@ -1,0 +1,3 @@
+requests
+pycryptodome
+PyExecJS==1.5.1
