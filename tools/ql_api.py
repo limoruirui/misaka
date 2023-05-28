@@ -46,6 +46,8 @@ def get_cookie_data(name):
     cookie = None
     cookies = get_config_and_envs(name)
     for ck in cookies:
+        if ck["name"] != name:
+            continue
         if ck.get('status') == 0:
             ck_list.append(ck.get('value'))
     if len(ck_list) < 1:
