@@ -32,7 +32,39 @@ def __get__headers() -> dict:
     }
     return headers
 
-# 封装读取环境变量的方法
+
+
+
+# 封装读取环境变量的方法(读取环境变量的整个CK)
+def get_cookie_remark(key, default="", output=True):
+    def no_read():
+        if output:
+            print_now(f"未填写环境变量 {key} 请添加")
+        return default
+    return get_cookie_all_data(key) if get_cookie_all_data(key) else no_read()
+
+
+#获取整个ck，包括备注
+def get_cookie_all_data(name):
+    ck_list = []
+    remarks_list = []
+    cookie = None
+    cookies = get_config_and_envs(name)
+    for ck in cookies:
+        data_temp = {}
+        if ck["name"] != name:
+            continue
+        if ck.get('status') == 0:
+            # ck_list.append(ck.get('value'))
+            # 直接添加CK
+            ck_list.append(ck)
+    if len(ck_list) < 1:
+        print('变量{}共配置{}条CK,请添加环境变量,或查看环境变量状态'.format(name,len(ck_list)))
+    return ck_list
+
+
+
+# 封装读取环境变量的方法(只读取环境变量的value)
 def get_cookie(key, default="", output=True):
     def no_read():
         if output:
@@ -40,7 +72,7 @@ def get_cookie(key, default="", output=True):
         return default
     return get_cookie_data(key) if get_cookie_data(key) else no_read()
 
-#获取ck
+#获取ck的value
 def get_cookie_data(name):
     ck_list = []
     cookie = None
