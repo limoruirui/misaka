@@ -36,7 +36,7 @@ def __get__headers() -> dict:
 
 
 # 封装读取环境变量的方法(读取环境变量的整个CK)
-def get_cookie_remark(key, default="", output=True):
+def get_cookie_all(key, default="", output=True):
     def no_read():
         if output:
             print_now(f"未填写环境变量 {key} 请添加")
