@@ -1,8 +1,8 @@
 """
-仅供学习交流，请在下载后的24小时内完全删除 请勿将任何内容用于商业或非法目的，否则后果自负。
+@yuanter 院长出品，仅供学习交流，请在下载后的24小时内完全删除 请勿将任何内容用于商业或非法目的，否则后果自负。
 越城监控兑换_v0.1 监控1、话费油卡类2、电影票3、实物类
 不支持多账号，企业微信通知 参数脚本内置
-# cron "50 9-59/10 * * * *" script-path=xxx.py,tag=匹配cron用
+# cron "0 0-59/5 * * * *" script-path=xxx.py,tag=匹配cron用
 # const $ = new Env('今日越城监控兑换商品');
 
 
@@ -339,34 +339,6 @@ def weixin_hook(title: str, content: str) -> None:
     else:
         print("企业微信机器人推送失败！")
 
-# 非必填
-# 使用环境变量jryc_monitor_huafei 监控话费油卡类，默认True监控兑换 填True 或者 False
-# huafei_list = get_cookie("jryc_monitor_huafei","",False)
-# if huafei_list != "" and len(huafei_list)>0:
-#     huafei_temp = huafei_list[0]["value"]
-#     if huafei_temp is None or huafei_temp == "":
-#         huafei_temp = "True"
-#     if huafei_temp == "False":
-#         huafei = False
-
-# 使用环境变量jryc_monitor_dianying 监控电影票，默认True监控兑换 填True 或者 False
-# dianying_list= get_cookie("jryc_monitor_dianying","",False)
-# if dianying_list != "" and len(dianying_list)>0:
-#     dianying_temp = dianying_list[0]["value"]
-#     if dianying_temp is None or dianying_temp == "":
-#         dianying_temp = "True"
-#     if dianying_temp == "False":
-#         dianying = False
-
-# 使用环境变量jryc_monitor_shiwu 监控实物类，默认True监控兑换 填True 或者 False
-# shiwu_list = get_cookie("jryc_monitor_shiwu","",False)
-# if shiwu_list != "" and len(shiwu_list)>0:
-#     shiwu_temp = shiwu_list[0]["value"]
-#     if shiwu_temp is None or shiwu_temp == "":
-#         shiwu_temp = "True"
-#     if shiwu_temp == "False":
-#         shiwu = False
-
 
 def main(value,remarks):
     huafei = True # 话费油卡类，默认True监控兑换 填True 或者 False
@@ -517,18 +489,7 @@ def exchange(SESSIONID,product_dict,remarks):
         'User-Agent': 'Mozilla/5.0 (Linux; Android 11; PFGM00 Build/RP1A.200720.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36;xsb_yuecheng;xsb_yuecheng;1.3.0;native_app',
 
     }
-    # 执行时间
-    start = datetime.datetime.strptime(str(datetime.datetime.now() + datetime.timedelta(days=0))[0:11] + start_time, '%Y-%m-%d %H:%M:%S.%f')
-    # start = datetime.datetime.strptime(str(datetime.datetime.now())[0:11] + start_time, '%Y-%m-%d %H:%M:%S.%f')
-
-    if debug:
-        print_now(f'{datetime.datetime.now().strftime("%H:%M:%S.%f")} 任务立即开始~')
-    else:
-        print_now(f'{datetime.datetime.now().strftime("%H:%M:%S.%f")} 任务将在{start}之后开始~')
-    if not debug:
-        while datetime.datetime.now() < start:
-            time.sleep(0.1)
-    print_now(f'{datetime.datetime.now().strftime("%H:%M:%S.%f")} 任务开始~')
+    
 
     monitor_url = 'https://jfwechat.chengquan.cn/integralMallProduct/getInventory'
     headers['Referer'] = 'https://jfwechat.chengquan.cn/integralMall/entityProductDetail?productId=9235'
@@ -627,6 +588,7 @@ if __name__ == '__main__':
     if len(ck_list)<1:
         print_now('未添加CK,退出程序~')
         exit(0)
+    print_now(f'{datetime.datetime.now().strftime("%H:%M:%S.%f")} 任务开始~')
     for j in range(len(ck_list)):
         ck = ck_list[j]["value"].split("&")
         remarks = ck_list[j]["remarks"]
