@@ -1,9 +1,8 @@
 """
 @yuanter 院长出品，仅供学习交流，请在下载后的24小时内完全删除 请勿将任何内容用于商业或非法目的，否则后果自负。
 越城监控兑换_v0.1 监控1、话费油卡类2、电影票3、实物类
-不支持多账号，企业微信通知 参数脚本内置
-# cron "0 0-59/5 * * * *" script-path=xxx.py,tag=匹配cron用
-# const $ = new Env('今日越城监控兑换商品');
+cron "0 0-59/5 * * * *" script-path=xxx.py,tag=匹配cron用
+const $ = new Env('今日越城监控兑换商品');
 
 
 环境变量jryc_monitor_data  必填（短链接和长链接，二选一） 
