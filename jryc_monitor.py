@@ -492,12 +492,14 @@ def exchange(SESSIONID,product_dict,remarks):
 
     monitor_url = 'https://jfwechat.chengquan.cn/integralMallProduct/getInventory'
     headers['Referer'] = 'https://jfwechat.chengquan.cn/integralMall/entityProductDetail?productId=9235'
+    
 
     for product_id in product_dict:
         data = {
             'productId': str(product_id),
             'propertyList': ''
         }
+        headers['Referer'] = f'https://jfwechat.chengquan.cn/integralMall/entityProductDetail?productId={str(product_id)}'
 
         response = requests.post(monitor_url, headers=headers, data=data)
         data = response.json()
@@ -516,6 +518,7 @@ def exchange(SESSIONID,product_dict,remarks):
             else:
                 if product_info['Consume Integral'] >= range_num:
                     exchange_url = "https://jfwechat.chengquan.cn/integralMallOrder/entityOrderNow"
+                    headers['Referer'] = f'https://jfwechat.chengquan.cn/integralMall/entityProductDetail?productId={product_info["Product ID"]}'
                     payload = {
                         'productId': product_info['Product ID'],
                         'exchangeNum': '1',
@@ -534,7 +537,8 @@ def exchange(SESSIONID,product_dict,remarks):
 
                 else:
                     print_now(f"积分小于{range_num}不兑换")
-        time.sleep(0.5)
+                # 防止并发出现频繁
+                time.sleep(0.5)
     if msg != "":
         msg = f'<font color="red" style="font-size:24px;">用户“{remarks}”兑换状态如下：</font>\n' + msg
         message = message + msg + "\n\n"
