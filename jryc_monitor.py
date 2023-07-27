@@ -562,7 +562,7 @@ def exchange(SESSIONID,product_dict,remarks):
             print_now(response.text)
             data = response.json()
             errorMsg = data.get("errorMsg",None)
-            if errorMsg is not None and errorMsg.startswith("非商品兑换时间。请在周五 10:00-11:00内尝试。"):
+            if errorMsg is not None and (errorMsg.startswith("非商品兑换时间。请在周五 10:00-11:00内尝试。") or errorMsg.startswith("操作频繁，请稍后再试")):
                 # 不执行添加消息操作，防止每次都添加该消息
                 continue
             # 需要推送的消息内容
