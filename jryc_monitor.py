@@ -420,6 +420,7 @@ def main(value,remarks):
                     consume_integral = row['consumeIntegral']
 
                     product_dict[product_id] = {
+                        'type': "huafei",
                         'Product Name': product_name,
                         'Product ID': product_id,
                         'Consume Integral': consume_integral
@@ -442,6 +443,7 @@ def main(value,remarks):
                     consume_integral = row['consumeIntegral']
 
                     product_dict[product_id] = {
+                        'type': "dianying",
                         'Product Name': product_name,
                         'Product ID': product_id,
                         'Consume Integral': consume_integral
@@ -459,19 +461,17 @@ def main(value,remarks):
                 data = response.json()
                 rows = data['data']['rows']
             
+                for row in rows:
+                    product_id = row['id']
+                    product_name = row['productName']
+                    consume_integral = row['consumeIntegral']
 
-           
-
-            for row in rows:
-                product_id = row['id']
-                product_name = row['productName']
-                consume_integral = row['consumeIntegral']
-
-                product_dict[product_id] = {
-                    'Product Name': product_name,
-                    'Product ID': product_id,
-                    'Consume Integral': consume_integral
-                }
+                    product_dict[product_id] = {
+                        'type': "shiwu",
+                        'Product Name': product_name,
+                        'Product ID': product_id,
+                        'Consume Integral': consume_integral
+                    }
             # 开始兑换
             exchange(SESSIONID,product_dict,remarks)
 
@@ -488,57 +488,87 @@ def exchange(SESSIONID,product_dict,remarks):
         'User-Agent': 'Mozilla/5.0 (Linux; Android 11; PFGM00 Build/RP1A.200720.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36;xsb_yuecheng;xsb_yuecheng;1.3.0;native_app',
 
     }
-    
-
-    monitor_url = 'https://jfwechat.chengquan.cn/integralMallProduct/getInventory'
-    headers['Referer'] = 'https://jfwechat.chengquan.cn/integralMall/entityProductDetail?productId=9235'
-    
-
     for product_id in product_dict:
+        product_info = product_dict[product_id]
         data = {
             'productId': str(product_id),
             'propertyList': ''
         }
-        headers['Referer'] = f'https://jfwechat.chengquan.cn/integralMall/entityProductDetail?productId={str(product_id)}'
+        # 实体类
+        if product_info['type'] == "shiwu":
+            monitor_url = 'https://jfwechat.chengquan.cn/integralMallProduct/getInventory'
+            headers['Referer'] = f'https://jfwechat.chengquan.cn/integralMall/entityProductDetail?productId={str(product_id)}'
+            response = requests.post(monitor_url, headers=headers, data=data)
+            data = response.json()
+            rows = data['data']
+            for row in rows:
+                saleable_inventory = row['saleableInventory']
+                print_now(f"ID:[{product_info['Product ID']}] {product_info['Product Name']}")
+                print_now(f"兑换积分:[{product_info['Consume Integral']}]库存:[{saleable_inventory}]\n")
+                if saleable_inventory == 0:
+                    # 库存为0，继续下一个商品
+                    continue
+                else:
+                    if product_info['Consume Integral'] >= range_num:
+                        headers['Referer'] = f'https://jfwechat.chengquan.cn/integralMall/entityProductDetail?productId={product_info["Product ID"]}'
+                        # 兑换实体类
+                        exchange_url = "https://jfwechat.chengquan.cn/integralMallOrder/entityOrderNow"
+                        payload = {
+                            'productId': product_info['Product ID'],
+                            'exchangeNum': '1',
+                            'takeId': '14937',
+                            'propertyIdList': '',
+                            'propertyList': '[]'
+                        }
+                        
 
-        response = requests.post(monitor_url, headers=headers, data=data)
-        data = response.json()
-        rows = data['data']
+                        response = requests.post(exchange_url, headers=headers, data=payload)
+                        # 处理返回的数据
+                        print_now(response.text)
+                        data = response.json()
 
-        for row in rows:
-            saleable_inventory = row['saleableInventory']
+                        
+                        # 需要推送的消息内容
+                        msg = msg + f"ID:{product_info['Product ID']} {product_info['Product Name']}\n兑换积分:[{product_info['Consume Integral']}]库存:[{saleable_inventory}]\n{data}\n诺，上面兑换状态！\n\n"
 
-            product_info = product_dict[product_id]
-
+                    else:
+                        print_now(f"积分小于{range_num}不兑换")
+                    # 防止并发出现频繁
+                    time.sleep(0.5)
+        # 话费类和电影票类
+        if product_info['type'] == "huafei" or product_info['type'] == "dianying":
+            monitor_url = 'https://jfwechat.chengquan.cn/integralMallOrder/checkInventory'
+            headers['Referer'] = f'https://jfwechat.chengquan.cn/integralMall/productDetail?productId={str(product_id)}'
+            response = requests.post(monitor_url, headers=headers, data=data)
+            data = response.json()
+            rows = data['data']
+            saleable_inventory = rows['amount']
             print_now(f"ID:[{product_info['Product ID']}] {product_info['Product Name']}")
             print_now(f"兑换积分:[{product_info['Consume Integral']}]库存:[{saleable_inventory}]\n")
             if saleable_inventory == 0:
                 # 库存为0，继续下一个商品
                 continue
-            else:
-                if product_info['Consume Integral'] >= range_num:
-                    exchange_url = "https://jfwechat.chengquan.cn/integralMallOrder/entityOrderNow"
-                    headers['Referer'] = f'https://jfwechat.chengquan.cn/integralMall/entityProductDetail?productId={product_info["Product ID"]}'
-                    payload = {
-                        'productId': product_info['Product ID'],
-                        'exchangeNum': '1',
-                        'takeId': '14937',
-                        'propertyIdList': '',
-                        'propertyList': '[]'
-                    }
+            # 兑换话费类和电影票类
+            exchange_url = f'https://jfwechat.chengquan.cn/integralMallOrder/orderNow'
+            headers['Referer'] = f'https://jfwechat.chengquan.cn/integralMall/productDetail?productId={product_info["Product ID"]}'
+            payload = {
+                'productId': product_info['Product ID'],
+                'exchangeNum': '1',
+                'rechargeNumber': '', 
+                'exchangeAccount': ''
+            }
+            response = requests.post(exchange_url, headers=headers, data=payload)
+            # 处理返回的数据
+            print_now(response.text)
+            data = response.json()
+            errorMsg = data.get("errorMsg",None)
+            if errorMsg is not None and errorMsg.startswith("非商品兑换时间。请在周五 10:00-11:00内尝试。"):
+                # 不执行添加消息操作，防止每次都添加该消息
+                continue
+            # 需要推送的消息内容
+            msg = msg + f"ID:{product_info['Product ID']} {product_info['Product Name']}\n兑换积分:[{product_info['Consume Integral']}]库存:[{saleable_inventory}]\n{data}\n诺，上面兑换状态！\n\n"
 
-                    response = requests.post(exchange_url, headers=headers, data=payload)
-                    data = response.json()
 
-                    # 处理返回的数据
-                    print_now(data)
-                    # 需要推送的消息内容
-                    msg = msg + f"ID:{product_info['Product ID']} {product_info['Product Name']}\n兑换积分:[{product_info['Consume Integral']}]库存:[{saleable_inventory}]\n{data}\n诺，上面兑换状态！\n\n"
-
-                else:
-                    print_now(f"积分小于{range_num}不兑换")
-                # 防止并发出现频繁
-                time.sleep(0.5)
     if msg != "":
         msg = f'<font color="red" style="font-size:24px;">用户“{remarks}”兑换状态如下：</font>\n' + msg
         message = message + msg + "\n\n"
