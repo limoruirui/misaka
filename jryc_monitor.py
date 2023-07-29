@@ -339,7 +339,8 @@ def weixin_hook(title: str, content: str) -> None:
         print("企业微信机器人推送失败！")
 
 
-def main(value,remarks):
+def main(count,value,remarks):
+    print_now(f"===========第{count}个账号，备注【{remarks}】，开始执行任务===========\n")
     huafei = True # 话费油卡类，默认True监控兑换 填True 或者 False
     dianying = True # 电影票，默认True监控兑换 填True 或者 False
     shiwu = True # 实物类，默认True监控兑换 填True 或者 False
@@ -366,7 +367,7 @@ def main(value,remarks):
         if shiwu_temp == "False":
             shiwu = False
     if not AccountId or not SessionId or not Sign:
-        print("参数不完整，程序未运行。请检查参数是否为空")
+        print_now(f"===========第{count}个账号，备注【{remarks}】，参数不完整，程序未运行。请检查参数是否为空===========\n")
     else:
         url = "https://promoa.ejiaofei.cn/ShaoXingLogin/VerifyUser"
         headers = {
@@ -403,8 +404,10 @@ def main(value,remarks):
 
             }
 
+            # 话费油卡类
             if huafei:
-                # 话费油卡类    
+                print_now(f"===========第{count}个账号，备注【{remarks}】，监控了话费和油卡类===========")
+                    
                 payload = {
                     "pageNumber": "1",
                     "pageSize": "10",
@@ -426,8 +429,11 @@ def main(value,remarks):
                         'Product ID': product_id,
                         'Consume Integral': consume_integral
                     }
+
+            # 电影票        
             if dianying:
-                # 电影票
+                print_now(f"===========第{count}个账号，备注【{remarks}】，监控了电影票类===========")
+                
                 payload = {
                     "pageNumber": "1",
                     "pageSize": "10",
@@ -452,14 +458,14 @@ def main(value,remarks):
 
             # 实物类
             if shiwu:
+                print_now(f"===========第{count}个账号，备注【{remarks}】，监控了实物类===========")
                 # 查询地址
                 address_url = 'https://jfwechat.chengquan.cn/attribution/selectList'
                 response = requests.post(address_url, headers=headers)
                 address_data = response.json()
                 address_list = address_data['data']
                 if address_list is None or len(address_list)<1:
-                    print_now("===========还未设置收货地址。请先设置地址============")
-                    print_now("===========当前账号，退出执行程序============")
+                    print_now(f"===========第{count}个账号，备注【{remarks}】，还未设置收货地址，请先设置地址。退出程序===========\n")
                     return
                 # 默认使用第一个地址
                 takeId = address_list[0]["id"]
@@ -635,14 +641,16 @@ if __name__ == '__main__':
     if len(ck_list)<1:
         print_now('未添加CK,退出程序~')
         exit(0)
-    print_now(f'{datetime.datetime.now().strftime("%H:%M:%S.%f")} 任务开始~')
+    print_now(f'===========请注意，本脚本使用了异步线程方式，后续任务执行顺序看起来是错乱的，这是正常现象===========\n')
+    print_now(f'===========本次一共找到{len(ck_list)}个账号===========\n')
+    print_now(f'===========本次执行时间：{datetime.datetime.now().strftime("%H:%M:%S.%f")} 任务开始~===========\n')
     for j in range(len(ck_list)):
         ck = ck_list[j]["value"].split("&")
         remarks = ck_list[j]["remarks"]
         if len(ck)<3:
-            print_now('CK参数不全，跳过')
+            print_now('===========第{j+1}个账号，CK参数不全，跳过===========\n')
             continue
-        p = threading.Thread(target=main,args=(ck_list[j]["value"],remarks))
+        p = threading.Thread(target=main,args=(j+1,ck_list[j]["value"],remarks))
         l.append(p)
         p.start()
     for i in l:
