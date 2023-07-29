@@ -394,6 +394,7 @@ def main(value,remarks):
             SESSIONID = match.group(1)
             # print("SESSIONID:", SESSIONID)
             product_dict = {}
+            takeId = 0
             rows = []
             url = 'https://jfwechat.chengquan.cn/integralMallUserProduct/getList'
             headers = {
@@ -449,8 +450,19 @@ def main(value,remarks):
                         'Consume Integral': consume_integral
                     }
 
+            # 实物类
             if shiwu:
-                # 实物类
+                # 查询地址
+                address_url = 'https://jfwechat.chengquan.cn/attribution/selectList'
+                response = requests.post(address_url, headers=headers)
+                address_data = response.json()
+                address_list = address_data['data']
+                if address_list is None or len(address_list)<1:
+                    print_now("===========还未设置收货地址。请先设置地址============")
+                    return
+                # 默认使用第一个地址
+                takeId = address_list[0]["id"]
+
                 payload = {
                     "pageNumber": "1",
                     "pageSize": "10",
@@ -473,14 +485,14 @@ def main(value,remarks):
                         'Consume Integral': consume_integral
                     }
             # 开始兑换
-            exchange(SESSIONID,product_dict,remarks)
+            exchange(SESSIONID,product_dict,takeId,remarks,range_num)
 
             
         else:
             print_now("No value found for SESSIONID")
 
 # 开始兑换
-def exchange(SESSIONID,product_dict,remarks):
+def exchange(SESSIONID,product_dict,takeId,remarks,range_num):
     global message
     msg = ""
     headers = {
@@ -488,6 +500,7 @@ def exchange(SESSIONID,product_dict,remarks):
         'User-Agent': 'Mozilla/5.0 (Linux; Android 11; PFGM00 Build/RP1A.200720.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36;xsb_yuecheng;xsb_yuecheng;1.3.0;native_app',
 
     }
+    
     for product_id in product_dict:
         product_info = product_dict[product_id]
         data = {
@@ -516,7 +529,7 @@ def exchange(SESSIONID,product_dict,remarks):
                         payload = {
                             'productId': product_info['Product ID'],
                             'exchangeNum': '1',
-                            'takeId': '14937',
+                            'takeId': takeId,
                             'propertyIdList': '',
                             'propertyList': '[]'
                         }
