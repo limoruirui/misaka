@@ -459,6 +459,7 @@ def main(value,remarks):
                 address_list = address_data['data']
                 if address_list is None or len(address_list)<1:
                     print_now("===========还未设置收货地址。请先设置地址============")
+                    print_now("===========当前账号，退出执行程序============")
                     return
                 # 默认使用第一个地址
                 takeId = address_list[0]["id"]
