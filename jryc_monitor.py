@@ -1,24 +1,30 @@
 """
 @yuanter 院长出品，仅供学习交流，请在下载后的24小时内完全删除 请勿将任何内容用于商业或非法目的，否则后果自负。
-越城监控兑换_v0.1 监控1、话费油卡类2、电影票3、实物类
+今日越城监控兑换_v0.1 监控1、话费油卡类2、电影票3、实物类
 cron "0 0-59/5 * * * *" script-path=xxx.py,tag=匹配cron用
 const $ = new Env('今日越城监控兑换商品');
 
+功能：今日越城监控并兑换商品，可兑换列表：话费油卡类、电影票、实物类
 
-环境变量jryc_monitor_data  必填（短链接和长链接，二选一） 
+环境变量jryc_monitor_data  必填（短链接和长链接，二选一） 新增可选参数：指定兑换商品ID，当指定兑换商品ID存在时，请设置监控对应的商品类，如监控实物类，同时设置的“兑换积分”参数失效，即兑换积分参数随便填，但不能删除兑“换积分参数”
 短链接，全部监控话费油卡类、电影票、实物类
-格式 AccountId&SessionId&Sign&兑换积分
+格式 AccountId&SessionId&Sign&兑换积分&指定兑换商品ID
 栗子，如637c7681b72ed364&64bcb6487d0506918&96d90a848f891afdc2bcd6cf&3000
+或者637c7681b72ed364&64bcb6487d0506918&96d90a848f891afdc2bcd6cf&3000&8928
+
 
 长链接，可自定义监控某一类的商品，不需要监控的参数设置为False，监控顺序1、话费油卡类2、电影票3、实物类
-格式 AccountId&SessionId&Sign&兑换积分&监控话费油卡类&监控电影票&监控实物类 
+格式 AccountId&SessionId&Sign&兑换积分&监控话费油卡类&监控电影票&监控实物类&指定兑换商品ID
 栗子，如637c7681b7d2ed364&64bcb6487dee0506918&96da848f891afdc2bcd6cf&3000&True&True&True
+或者637c7681b7d2ed364&64bcb6487dee0506918&96da848f891afdc2bcd6cf&3000&True&True&True&8928
 
 解释
 抓包 https://promoa.ejiaofei.cn/ShaoXingLogin/VerifyUser 取出body下三个参数，AccountId，SessionId，Sign
 监控话费油卡类，默认True监控兑换 填True 或者 False
 监控电影票，默认True监控兑换 填True 或者 False
 监控实物类，默认True监控兑换 填True 或者 False
+兑换积分，当商品满足兑换积分时，有库存且个人账户积分足够，则开始自动兑换
+指定兑换商品ID，当指定兑换商品ID存在时，请设置监控对应的商品类，如监控实物类，同时设置的“兑换积分”参数失效，但不能删除兑“换积分参数”。可先执行一遍全部监控，即可根据任务日志找到商品ID
 
 """
 
@@ -41,7 +47,6 @@ import time
 import threading
 
 
-start_time = '9:59:59.83'
 now = datetime.datetime.now()
 hour = now.hour
 minute = now.minute
@@ -340,15 +345,27 @@ def weixin_hook(title: str, content: str) -> None:
 
 
 def main(count,value,remarks):
-    print_now(f"===========第{count}个账号，备注【{remarks}】，开始执行任务===========\n")
+    print_now(f"===========开始执行任务，第{count}个账号，备注【{remarks}】===========\n")
     huafei = True # 话费油卡类，默认True监控兑换 填True 或者 False
     dianying = True # 电影票，默认True监控兑换 填True 或者 False
     shiwu = True # 实物类，默认True监控兑换 填True 或者 False
     ck = value.split("&")
     AccountId,SessionId,Sign = ck[0],ck[1],ck[2]
-    if len(ck) >= 4:
+    # 兑换积分
+    if len(ck) == 4:
         range_num = int(ck[3])
+    assign = None
+    # 指定兑换ID
+    if len(ck) == 5:
+        range_num = int(ck[3])
+        assign = int(ck[4])
+        print_now(f"===========第{count}个账号，备注【{remarks}】，已设置指定兑换ID：{assign} 下面执行兑换指定的商品===========\n")
     if len(ck) >= 7:
+        if len(ck) == 8:
+            # 指定兑换ID
+            assign = int(ck[7])
+            print_now(f"===========第{count}个账号，备注【{remarks}】，已设置指定兑换ID：{assign} 下面执行兑换指定的商品===========\n")
+        range_num = int(ck[3])
         huafei_temp = ck[4]
         if huafei_temp is None or huafei_temp == "":
             huafei_temp = "True"
@@ -380,17 +397,19 @@ def main(count,value,remarks):
             "Sign": Sign
 
         }
+        match = False
+        try:
+            response = requests.post(url, headers=headers, data=payload)
+            value = response.json()["data"]
+            # print(value)
 
-        response = requests.post(url, headers=headers, data=payload)
-        value = response.json()["data"]
-        # print(value)
+            response = requests.post(url=value)
+            html_code = response.text
 
-        response = requests.post(url=value)
-        html_code = response.text
-
-        pattern = r'var SESSIONID = "(.*?)";'
-        match = re.search(pattern, html_code)
-
+            pattern = r'var SESSIONID = "(.*?)";'
+            match = re.search(pattern, html_code)
+        except Exception as ex:
+            print(f'{datetime.datetime.now().strftime("%H:%M:%S.%f")} [{cookieKey["remarks"]}]登录出错了----------错误响应：\n{ex}')
         if match:
             SESSIONID = match.group(1)
             # print("SESSIONID:", SESSIONID)
@@ -403,10 +422,16 @@ def main(count,value,remarks):
                 'User-Agent': 'Mozilla/5.0 (Linux; Android 11; PFGM00 Build/RP1A.200720.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36;xsb_yuecheng;xsb_yuecheng;1.3.0;native_app',
 
             }
+            # 查询用户总积分
+            user_count_url = f'https://jfwechat.chengquan.cn/integralMallOrder/getIntegral'
+            response = requests.post(user_count_url, headers=headers)
+            user_count_data = response.json()
+            user_count = user_count_data["data"]
+            print_now(f"===========第{count}个账号，备注【{remarks}】，总积分：{user_count} ===========\n")
 
             # 话费油卡类
             if huafei:
-                print_now(f"===========第{count}个账号，备注【{remarks}】，监控了话费和油卡类===========")
+                print_now(f"===========第{count}个账号，备注【{remarks}】，开始监控话费和油卡类===========")
                     
                 payload = {
                     "pageNumber": "1",
@@ -422,6 +447,11 @@ def main(count,value,remarks):
                     product_id = row['id']
                     product_name = row['productName']
                     consume_integral = row['consumeIntegral']
+                    # 跳过非指定的商品id
+                    if assign is not None and assign != product_id:
+                        if debug:
+                            print_now(f'执行监控ID：{assign} 跳过非指定的商品id：{product_id}')
+                        continue
 
                     product_dict[product_id] = {
                         'type': "huafei",
@@ -432,7 +462,7 @@ def main(count,value,remarks):
 
             # 电影票        
             if dianying:
-                print_now(f"===========第{count}个账号，备注【{remarks}】，监控了电影票类===========")
+                print_now(f"===========第{count}个账号，备注【{remarks}】，开始监控电影票类===========")
                 
                 payload = {
                     "pageNumber": "1",
@@ -448,6 +478,11 @@ def main(count,value,remarks):
                     product_id = row['id']
                     product_name = row['productName']
                     consume_integral = row['consumeIntegral']
+                    # 跳过非指定的商品id
+                    if assign is not None and assign != product_id:
+                        if debug:
+                            print_now(f'执行监控ID：{assign} 跳过非指定的商品id：{product_id}')
+                        continue
 
                     product_dict[product_id] = {
                         'type': "dianying",
@@ -458,14 +493,15 @@ def main(count,value,remarks):
 
             # 实物类
             if shiwu:
-                print_now(f"===========第{count}个账号，备注【{remarks}】，监控了实物类===========")
+                print_now(f"===========第{count}个账号，备注【{remarks}】，开始监控实物类===========")
+                
                 # 查询地址
                 address_url = 'https://jfwechat.chengquan.cn/attribution/selectList'
                 response = requests.post(address_url, headers=headers)
                 address_data = response.json()
                 address_list = address_data['data']
                 if address_list is None or len(address_list)<1:
-                    print_now(f"===========第{count}个账号，备注【{remarks}】，还未设置收货地址，请先设置地址。退出程序===========\n")
+                    print_now(f"===========第{count}个账号，备注【{remarks}】，还未设置收货地址，请先设置地址。强制退出程序===========\n")
                     return
                 # 默认使用第一个地址
                 takeId = address_list[0]["id"]
@@ -484,7 +520,11 @@ def main(count,value,remarks):
                     product_id = row['id']
                     product_name = row['productName']
                     consume_integral = row['consumeIntegral']
-
+                    # 跳过非指定的商品id
+                    if assign is not None and assign != product_id:
+                        if debug:
+                            print_now(f'执行监控ID：{assign} 跳过非指定的商品id：{product_id}')
+                        continue
                     product_dict[product_id] = {
                         'type': "shiwu",
                         'Product Name': product_name,
@@ -584,6 +624,7 @@ def exchange(SESSIONID,product_dict,takeId,remarks,range_num):
             errorMsg = data.get("errorMsg",None)
             if errorMsg is not None and (errorMsg.startswith("非商品兑换时间。请在周五 10:00-11:00内尝试。") or errorMsg.startswith("操作频繁，请稍后再试")):
                 # 不执行添加消息操作，防止每次都添加该消息
+                print_now(f'出现“非商品兑换时间。请在周五 10:00-11:00内尝试”或者“操作频繁，请稍后再试”，不执行添加消息操作\n')
                 continue
             # 需要推送的消息内容
             msg = msg + f"ID:{product_info['Product ID']} {product_info['Product Name']}\n兑换积分:[{product_info['Consume Integral']}]库存:[{saleable_inventory}]\n{data}\n诺，上面兑换状态！\n\n"
@@ -642,7 +683,7 @@ if __name__ == '__main__':
         print_now('未添加CK,退出程序~')
         exit(0)
     print_now(f'===========请注意，本脚本使用了异步线程方式，后续任务执行顺序看起来是错乱的，这是正常现象===========\n')
-    print_now(f'===========本次一共找到{len(ck_list)}个账号===========\n')
+    print_now(f'===========本次一共找到 {len(ck_list)} 个账号===========\n')
     print_now(f'===========本次执行时间：{datetime.datetime.now().strftime("%H:%M:%S.%f")} 任务开始~===========\n')
     for j in range(len(ck_list)):
         ck = ck_list[j]["value"].split("&")
