@@ -1,16 +1,19 @@
 """
 @yuanter 院长出品，仅供学习交流，请在下载后的24小时内完全删除 请勿将任何内容用于商业或非法目的，否则后果自负。
-今日越城监控兑换_v0.1 监控1、话费油卡类2、电影票3、实物类
+今日越城监控兑换_v0.2 监控1、话费油卡类2、电影票3、实物类
 cron "0 0-59/5 * * * *" script-path=xxx.py,tag=匹配cron用
 const $ = new Env('今日越城监控兑换商品');
 
 功能：今日越城监控并兑换商品，可兑换列表：话费油卡类、电影票、实物类
 
-环境变量jryc_monitor_data  必填（短链接和长链接，二选一） 新增可选参数：指定兑换商品ID，当指定兑换商品ID存在时，请设置监控对应的商品类，如监控实物类，同时设置的“兑换积分”参数失效，即兑换积分参数随便填，但不能删除兑“换积分参数”
+环境变量jryc_monitor_data  必填（短链接和长链接，二选一） 多账号直接新建多变量环境，也使用@或者#拼接
+新增可选参数：指定兑换商品ID，当指定兑换商品ID存在时，请设置监控对应的商品类，如监控实物类，同时设置的“兑换积分”参数失效，即兑换积分参数随便填，但不能删除兑“换积分参数”
+存在指定兑换商品ID时，可指定多个id，使用英文加号+拼接，如8928+8439+8430+8433
+
 短链接，全部监控话费油卡类、电影票、实物类
 格式 AccountId&SessionId&Sign&兑换积分&指定兑换商品ID
 栗子，如637c7681b72ed364&64bcb6487d0506918&96d90a848f891afdc2bcd6cf&3000
-或者637c7681b72ed364&64bcb6487d0506918&96d90a848f891afdc2bcd6cf&3000&8928
+或者637c7681b72ed364&64bcb6487d0506918&96d90a848f891afdc2bcd6cf&3000&8928+8439+8430+8433
 
 
 长链接，可自定义监控某一类的商品，不需要监控的参数设置为False，监控顺序1、话费油卡类2、电影票3、实物类
@@ -354,16 +357,21 @@ def main(count,value,remarks):
     # 兑换积分
     if len(ck) == 4:
         range_num = int(ck[3])
-    assign = None
+    assign = []
     # 指定兑换ID
     if len(ck) == 5:
         range_num = int(ck[3])
-        assign = int(ck[4])
+        id_list = ck[4].split("+")
+        for i in range(len(id_list)):
+            assign.append(int(id_list[i]))
         print_now(f"===========第{count}个账号，备注【{remarks}】，已设置指定兑换ID：{assign} 下面执行兑换指定的商品===========\n")
     if len(ck) >= 7:
         if len(ck) == 8:
             # 指定兑换ID
-            assign = int(ck[7])
+            id_list = ck[7].split("+")
+            for i in range(len(id_list)):
+                print_now(f"打印数据：{id_list[i]}")
+                assign.append(int(id_list[i]))
             print_now(f"===========第{count}个账号，备注【{remarks}】，已设置指定兑换ID：{assign} 下面执行兑换指定的商品===========\n")
         range_num = int(ck[3])
         huafei_temp = ck[4]
@@ -399,7 +407,7 @@ def main(count,value,remarks):
         }
         match = False
         try:
-            response = requests.post(url, headers=headers, data=payload)
+            response = requests.post(url, headers=headers, data=payload,timeout=60)
             value = response.json()["data"]
             # print(value)
 
@@ -424,7 +432,7 @@ def main(count,value,remarks):
             }
             # 查询用户总积分
             user_count_url = f'https://jfwechat.chengquan.cn/integralMallOrder/getIntegral'
-            response = requests.post(user_count_url, headers=headers)
+            response = requests.post(user_count_url, headers=headers,timeout=60)
             user_count_data = response.json()
             user_count = user_count_data["data"]
             print_now(f"===========第{count}个账号，备注【{remarks}】，总积分：{user_count} ===========\n")
@@ -448,7 +456,7 @@ def main(count,value,remarks):
                     product_name = row['productName']
                     consume_integral = row['consumeIntegral']
                     # 跳过非指定的商品id
-                    if assign is not None and assign != product_id:
+                    if product_id not in assign and len(assign) > 0:
                         if debug:
                             print_now(f'执行监控ID：{assign} 跳过非指定的商品id：{product_id}')
                         continue
@@ -470,7 +478,7 @@ def main(count,value,remarks):
                     "userCategoryId": "1501",
                     "type": "PRODUCT_TEAM"
                 }
-                response = requests.post(url, headers=headers, data=payload)
+                response = requests.post(url, headers=headers, data=payload,timeout=60)
                 data = response.json()
                 rows = data['data']['rows']
                 
@@ -479,7 +487,7 @@ def main(count,value,remarks):
                     product_name = row['productName']
                     consume_integral = row['consumeIntegral']
                     # 跳过非指定的商品id
-                    if assign is not None and assign != product_id:
+                    if product_id not in assign and len(assign) > 0:
                         if debug:
                             print_now(f'执行监控ID：{assign} 跳过非指定的商品id：{product_id}')
                         continue
@@ -497,7 +505,7 @@ def main(count,value,remarks):
                 
                 # 查询地址
                 address_url = 'https://jfwechat.chengquan.cn/attribution/selectList'
-                response = requests.post(address_url, headers=headers)
+                response = requests.post(address_url, headers=headers,timeout=60)
                 address_data = response.json()
                 address_list = address_data['data']
                 if address_list is None or len(address_list)<1:
@@ -512,7 +520,7 @@ def main(count,value,remarks):
                     "userCategoryId": "8388",
                     "type": "PRODUCT_MODULE"
                 }
-                response = requests.post(url, headers=headers, data=payload)
+                response = requests.post(url, headers=headers, data=payload,timeout=60)
                 data = response.json()
                 rows = data['data']['rows']
             
@@ -521,7 +529,7 @@ def main(count,value,remarks):
                     product_name = row['productName']
                     consume_integral = row['consumeIntegral']
                     # 跳过非指定的商品id
-                    if assign is not None and assign != product_id:
+                    if product_id not in assign and len(assign) > 0:
                         if debug:
                             print_now(f'执行监控ID：{assign} 跳过非指定的商品id：{product_id}')
                         continue
@@ -558,7 +566,7 @@ def exchange(SESSIONID,product_dict,takeId,remarks,range_num):
         if product_info['type'] == "shiwu":
             monitor_url = 'https://jfwechat.chengquan.cn/integralMallProduct/getInventory'
             headers['Referer'] = f'https://jfwechat.chengquan.cn/integralMall/entityProductDetail?productId={str(product_id)}'
-            response = requests.post(monitor_url, headers=headers, data=data)
+            response = requests.post(monitor_url, headers=headers, data=data,timeout=60)
             data = response.json()
             rows = data['data']
             for row in rows:
@@ -582,7 +590,7 @@ def exchange(SESSIONID,product_dict,takeId,remarks,range_num):
                         }
                         
 
-                        response = requests.post(exchange_url, headers=headers, data=payload)
+                        response = requests.post(exchange_url, headers=headers, data=payload,timeout=60)
                         # 处理返回的数据
                         print_now(response.text)
                         data = response.json()
@@ -617,7 +625,7 @@ def exchange(SESSIONID,product_dict,takeId,remarks,range_num):
                 'rechargeNumber': '', 
                 'exchangeAccount': ''
             }
-            response = requests.post(exchange_url, headers=headers, data=payload)
+            response = requests.post(exchange_url, headers=headers, data=payload,timeout=60)
             # 处理返回的数据
             print_now(response.text)
             data = response.json()
