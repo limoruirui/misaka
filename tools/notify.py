@@ -75,6 +75,10 @@ push_config = {
     'TG_PROXY_AUTH': '',                # tg 代理认证参数
     'TG_PROXY_HOST': '',                # tg 机器人的 TG_PROXY_HOST
     'TG_PROXY_PORT': '',                # tg 机器人的 TG_PROXY_PORT
+
+    'WXPUSHER_URL': '',                 # 使用wxpusher推送的发送地址
+    'WXPUSHER_TOKEN': '',               # wxpusher推送的token
+    'WXPUSHER_TOPIC_ID':'',             # wxpushe推送的topicId
 }
 notify_function = []
 # fmt: on
@@ -477,6 +481,38 @@ def telegram_bot(title: str, content: str) -> None:
         print("tg 推送失败！")
 
 
+def wxpusher(title: str, content: str) -> None:
+    """
+    使用微信的wxpusher推送
+    """
+    if not push_config.get("WXPUSHER_TOKEN") or not push_config.get("WXPUSHER_TOPIC_ID"):
+        print("wxpusher 服务的 token 或者 topicId 未设置!!\n取消推送")
+        return
+    print("wxpusher 服务启动")
+
+    url = f"https://wxpusher.zjiecode.com/api/send/message"
+    headers = {"Content-Type": "application/json;charset=utf-8"}
+    data = {
+        "appToken":f"{push_config.get('WXPUSHER_TOKEN')}",
+        "content":f"{content}",
+        "summary":f"{title}",
+        "contentType":1,
+        "topicIds":[ 
+           f'{push_config.get("WXPUSHER_TOPIC_ID")}'
+        ],
+        "verifyPay":False
+    }
+    response = requests.post(
+        url=url, data=json.dumps(data), headers=headers, timeout=15
+    ).json()
+
+    if response["code"] == 1000:
+        print("wxpusher推送成功！")
+    else:
+        print("wxpusher推送失败！")
+
+
+
 def one() -> str:
     """
     获取一条一言。
@@ -513,6 +549,8 @@ if push_config.get("QYWX_KEY"):
     notify_function.append(wecom_bot)
 if push_config.get("TG_BOT_TOKEN") and push_config.get("TG_USER_ID"):
     notify_function.append(telegram_bot)
+if push_config.get("WXPUSHER_TOKEN") and push_config.get("WXPUSHER_TOPIC_ID"):
+    notify_function.append(wxpusher)
 
 
 def send(title: str, content: str) -> None:
