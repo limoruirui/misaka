@@ -78,7 +78,8 @@ push_config = {
 
     'WXPUSHER_URL': '',                 # 使用wxpusher推送的发送地址
     'WXPUSHER_TOKEN': '',               # wxpusher推送的token
-    'WXPUSHER_TOPIC_ID':'',             # wxpushe推送的topicId
+    'WXPUSHER_TOPIC_ID': '',            # wxpushe推送的topicId
+    'WXPUSHER_CONTENT_TYPE': '',        # wxpusher推送的样式，1表示文字  2表示html(只发送body标签内部的数据即可，不包括body标签)，默认为2
 }
 notify_function = []
 # fmt: on
@@ -492,11 +493,18 @@ def wxpusher(title: str, content: str) -> None:
 
     url = f"https://wxpusher.zjiecode.com/api/send/message"
     headers = {"Content-Type": "application/json;charset=utf-8"}
+    contentType = 2
+    if not push_config.get("WXPUSHER_CONTENT_TYPE"):
+        contentType = 2
+    else:
+        contentType = int(push_config.get("WXPUSHER_CONTENT_TYPE"))
+    if contentType == 2:
+        content = content.replace("\n", "<br/>")
     data = {
         "appToken":f"{push_config.get('WXPUSHER_TOKEN')}",
         "content":f"{content}",
         "summary":f"{title}",
-        "contentType":1,
+        "contentType": contentType,
         "topicIds":[ 
            f'{push_config.get("WXPUSHER_TOPIC_ID")}'
         ],
