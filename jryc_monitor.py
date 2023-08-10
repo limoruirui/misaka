@@ -621,7 +621,7 @@ def exchange(SESSIONID,product_dict,takeId,remarks,range_num):
             headers['Referer'] = f'https://jfwechat.chengquan.cn/integralMall/productDetail?productId={product_info["Product ID"]}'
             payload = {
                 'productId': product_info['Product ID'],
-                'exchangeNum': '1',
+                'exchangeNum': 1,
                 'rechargeNumber': '', 
                 'exchangeAccount': ''
             }
