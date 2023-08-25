@@ -1,10 +1,14 @@
 """
 @yuanter 院长出品，仅供学习交流，请在下载后的24小时内完全删除 请勿将任何内容用于商业或非法目的，否则后果自负。
-今日越城监控兑换_v0.2 监控1、话费油卡类2、电影票3、实物类
+今日越城监控兑换_v0.3 监控1、话费油卡类2、电影票3、实物类
 cron "0 0-59/5 * * * *" script-path=xxx.py,tag=匹配cron用
 const $ = new Env('今日越城监控兑换商品');
 
 功能：今日越城监控并兑换商品，可兑换列表：话费油卡类、电影票、实物类
+
+若是监控了油卡和手机号类，请填写下列两个变量
+环境变量jryc_monitor_youkaNumber  选填 油卡账号
+环境变量jryc_monitor_mobileNumber  选填 手机账号
 
 环境变量jryc_monitor_data  必填（短链接和长链接，二选一） 多账号直接新建多变量环境，也使用@或者#拼接
 新增可选参数：指定兑换商品ID，当指定兑换商品ID存在时，请设置监控对应的商品类，如监控实物类
@@ -38,6 +42,8 @@ key = ""  # 企业微信推送 webhook 后面的 key
 PUSH_PLUS_TOKEN = ''  #推送token
 PUSH_PLUS_GROUP = '' #推送的群组
 debug = False  # False  True
+jryc_monitor_youkaNumber = "" # 油卡账号
+jryc_monitor_mobileNumber = "" # 手机账号
 
 ##################################################源码区域，非维护勿动##################################################
 import json
@@ -181,7 +187,7 @@ def get_config_and_envs(name: str = None) -> list:
                 #以=分割，查找需要的环境名字
                 tmp = list_all[1].split("=")
                 if len(tmp) > 1:
-                    
+
                     info = tmp[0]
                     if name in info:
                         #print('需要查询的环境数据：{}'.format(tmp))
@@ -198,14 +204,14 @@ def get_config_and_envs(name: str = None) -> list:
                         }
                         if flag == 'old':
                             data_json = {
-                            '_id': None,
-                            'value': tmp[1],
-                            'status': 0,
-                            'name': name,
-                            'remarks': "",
-                            'position': None,
-                            'timestamp': int(time.time()*1000),
-                            'created': int(time.time()*1000)
+                                '_id': None,
+                                'value': tmp[1],
+                                'status': 0,
+                                'name': name,
+                                'remarks': "",
+                                'position': None,
+                                'timestamp': int(time.time()*1000),
+                                'created': int(time.time()*1000)
                             }
                         #print('需要的数据：{}'.format(data_json))
                         data.append(data_json)
@@ -236,19 +242,19 @@ def put_envs(_id: str, name: str, value: str, remarks: str = None) -> bool:
     params = {
         't': int(time.time() * 1000)
     }
-    
+
     data = {
         'name': name,
         'value': value,
         'id': _id
     }
     if flag == 'old':
-       data = {
-        'name': name,
-        'value': value,
-        '_id': _id
-        } 
-    
+        data = {
+            'name': name,
+            'value': value,
+            '_id': _id
+        }
+
     if remarks is not None:
         data['remarks'] = remarks
     res = requests.put(ql_url + '/api/envs', headers=__get__headers(), params=params, json=data)
@@ -379,13 +385,13 @@ def main(count,value,remarks):
             huafei_temp = "True"
         if huafei_temp == "False":
             huafei = False
-        
+
         dianying_temp = ck[5]
         if dianying_temp is None or dianying_temp == "":
             dianying_temp = "True"
         if dianying_temp == "False":
             dianying = False
-        
+
         shiwu_temp = ck[6]
         if shiwu_temp is None or shiwu_temp == "":
             shiwu_temp = "True"
@@ -440,7 +446,7 @@ def main(count,value,remarks):
             # 话费油卡类
             if huafei:
                 print_now(f"===========第{count}个账号，备注【{remarks}】，开始监控话费和油卡类===========")
-                    
+
                 payload = {
                     "pageNumber": "1",
                     "pageSize": "10",
@@ -450,11 +456,12 @@ def main(count,value,remarks):
                 response = requests.post(url, headers=headers, data=payload)
                 data = response.json()
                 rows = data['data']['rows']
-                
+
                 for row in rows:
                     product_id = row['id']
                     product_name = row['productName']
                     consume_integral = row['consumeIntegral']
+                    productType = row['productType']
                     # 跳过非指定的商品id
                     if product_id not in assign and len(assign) > 0:
                         if debug:
@@ -465,27 +472,29 @@ def main(count,value,remarks):
                         'type': "huafei",
                         'Product Name': product_name,
                         'Product ID': product_id,
-                        'Consume Integral': consume_integral
+                        'Consume Integral': consume_integral,
+                        'productType': productType,
                     }
 
-            # 电影票        
+            # 电影票
             if dianying:
                 print_now(f"===========第{count}个账号，备注【{remarks}】，开始监控电影票类===========")
-                
+
                 payload = {
                     "pageNumber": "1",
                     "pageSize": "10",
                     "userCategoryId": "1501",
-                    "type": "PRODUCT_TEAM"
+                    "type": "PRODUCT_TEAM",
                 }
                 response = requests.post(url, headers=headers, data=payload,timeout=60)
                 data = response.json()
                 rows = data['data']['rows']
-                
+
                 for row in rows:
                     product_id = row['id']
                     product_name = row['productName']
                     consume_integral = row['consumeIntegral']
+                    productType = row['productType']
                     # 跳过非指定的商品id
                     if product_id not in assign and len(assign) > 0:
                         if debug:
@@ -496,13 +505,14 @@ def main(count,value,remarks):
                         'type': "dianying",
                         'Product Name': product_name,
                         'Product ID': product_id,
-                        'Consume Integral': consume_integral
+                        'Consume Integral': consume_integral,
+                        'productType': productType,
                     }
 
             # 实物类
             if shiwu:
                 print_now(f"===========第{count}个账号，备注【{remarks}】，开始监控实物类===========")
-                
+
                 # 查询地址
                 address_url = 'https://jfwechat.chengquan.cn/attribution/selectList'
                 response = requests.post(address_url, headers=headers,timeout=60)
@@ -512,6 +522,7 @@ def main(count,value,remarks):
                     print_now(f"===========第{count}个账号，备注【{remarks}】，还未设置收货地址，请先设置地址。强制退出程序===========\n")
                     return
                 # 默认使用第一个地址
+                # print_now(f"地址：{address_list[0]}")
                 takeId = address_list[0]["id"]
 
                 payload = {
@@ -523,7 +534,7 @@ def main(count,value,remarks):
                 response = requests.post(url, headers=headers, data=payload,timeout=60)
                 data = response.json()
                 rows = data['data']['rows']
-            
+
                 for row in rows:
                     product_id = row['id']
                     product_name = row['productName']
@@ -542,7 +553,7 @@ def main(count,value,remarks):
             # 开始兑换
             exchange(SESSIONID,product_dict,takeId,remarks,range_num)
 
-            
+
         else:
             print_now("No value found for SESSIONID")
 
@@ -555,7 +566,7 @@ def exchange(SESSIONID,product_dict,takeId,remarks,range_num):
         'User-Agent': 'Mozilla/5.0 (Linux; Android 11; PFGM00 Build/RP1A.200720.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36;xsb_yuecheng;xsb_yuecheng;1.3.0;native_app',
 
     }
-    
+
     for product_id in product_dict:
         product_info = product_dict[product_id]
         data = {
@@ -588,14 +599,14 @@ def exchange(SESSIONID,product_dict,takeId,remarks,range_num):
                             'propertyIdList': '',
                             'propertyList': '[]'
                         }
-                        
+
 
                         response = requests.post(exchange_url, headers=headers, data=payload,timeout=60)
                         # 处理返回的数据
                         print_now(response.text)
                         data = response.json()
 
-                        
+
                         # 需要推送的消息内容
                         msg = msg + f"ID:{product_info['Product ID']} {product_info['Product Name']}\n兑换积分:[{product_info['Consume Integral']}]库存:[{saleable_inventory}]\n{data}\n诺，上面兑换状态！\n\n"
 
@@ -610,7 +621,10 @@ def exchange(SESSIONID,product_dict,takeId,remarks,range_num):
             response = requests.post(monitor_url, headers=headers, data=data)
             data = response.json()
             rows = data['data']
+            # 库存
             saleable_inventory = rows['amount']
+            # 虚拟类型
+            productType = product_info['productType']
             print_now(f"ID:[{product_info['Product ID']}] {product_info['Product Name']}")
             print_now(f"兑换积分:[{product_info['Consume Integral']}]库存:[{saleable_inventory}]\n")
             if saleable_inventory == 0:
@@ -619,11 +633,19 @@ def exchange(SESSIONID,product_dict,takeId,remarks,range_num):
             # 兑换话费类和电影票类
             exchange_url = f'https://jfwechat.chengquan.cn/integralMallOrder/orderNow'
             headers['Referer'] = f'https://jfwechat.chengquan.cn/integralMall/productDetail?productId={product_info["Product ID"]}'
+            # 判断账号是否需要填入
+            rechargeNumber = ""
+            # 加油卡账号||或者电影票账号
+            if productType == "COUPON":
+                rechargeNumber = jryc_monitor_youkaNumber
+            # 手机号
+            if productType == "RECHARGE":
+                rechargeNumber = jryc_monitor_mobileNumber
             payload = {
                 'productId': product_info['Product ID'],
                 'exchangeNum': 1,
-                'rechargeNumber': '', 
-                'exchangeAccount': ''
+                'rechargeNumber': rechargeNumber,
+                'exchangeAccount': ""
             }
             response = requests.post(exchange_url, headers=headers, data=payload,timeout=60)
             # 处理返回的数据
@@ -641,11 +663,19 @@ def exchange(SESSIONID,product_dict,takeId,remarks,range_num):
     if msg != "":
         msg = f'<font color="red" style="font-size:24px;">用户“{remarks}”兑换状态如下：</font>\n' + msg
         message = message + msg + "\n\n"
-    
+
 
 
 
 if __name__ == '__main__':
+    # 油卡账号
+    jryc_monitor_youkaNumber_temp = get_cookie("jryc_monitor_youkaNumber")
+    if jryc_monitor_youkaNumber_temp != "" and len(jryc_monitor_youkaNumber_temp)>0:
+        jryc_monitor_youkaNumber = jryc_monitor_youkaNumber_temp[0]["value"]
+    # 手机账号
+    jryc_monitor_mobileNumber_temp = get_cookie("jryc_monitor_mobileNumber")
+    if jryc_monitor_mobileNumber_temp != "" and len(jryc_monitor_mobileNumber_temp)>0:
+        jryc_monitor_mobileNumber = jryc_monitor_mobileNumber_temp[0]["value"]
     l = []
     # 获取青龙CK和备注
     ck_list = []
@@ -718,5 +748,5 @@ if __name__ == '__main__':
                 try:
                     weixin_hook(title, message)
                 except Exception as e:
-                    print_now(f'推送异常：{e}')    
+                    print_now(f'推送异常：{e}')
     print_now(f'{datetime.datetime.now().strftime("%H:%M:%S.%f")} 任务结束~')
