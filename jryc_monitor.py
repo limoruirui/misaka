@@ -527,9 +527,9 @@ def main(count,value,remarks):
 
                 payload = {
                     "pageNumber": "1",
-                    "pageSize": "10",
-                    "userCategoryId": "8388",
-                    "type": "PRODUCT_MODULE"
+                    "pageSize": "100",
+                    "userCategoryId": "1614", # 精选共富专区：旧版参数---8388，新版---8673  共富专区：1614
+                    "type": "PRODUCT_TEAM", # 精选共富专区：旧版参数---PRODUCT_MODULE  共富专区：PRODUCT_TEAM
                 }
                 response = requests.post(url, headers=headers, data=payload,timeout=60)
                 data = response.json()
