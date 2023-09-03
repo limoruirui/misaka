@@ -15,7 +15,10 @@
 步骤：
 1. 先填写变量WoChangYouCK_Phone(手机号)，然后执行本脚本
 2. 获取到验证码后，再填入变量WoChangYouCK_Code(验证码)，再次执行脚本
-3. 最后本脚本会自动生成青龙环境WoChangYouCK，同时备注上手机号。或者自己根据日志自行复制access_token值
+
+请注意：
+变量WoChangYouCK_Code不存在时，会执行发送验证码操作
+变量WoChangYouCK_Code存在时，会自动登录并生成青龙环境WoChangYouCK，同时会在青龙环境备注上手机号。或者自己根据日志自行复制access_token值
 
 """
 import requests,re
