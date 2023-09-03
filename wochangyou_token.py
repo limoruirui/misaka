@@ -368,8 +368,8 @@ def login_post(cookieKey):
             print_now(f'成功获取access_token: {access_token}  请复制保存使用\n')
             # 获取沃畅游CK
             cklist_temp = get_cookie("WoChangYouCK")
+            flag = False
             if len(cklist_temp)>0:
-                flag = False
                 for i in range(len(cklist_temp)):
                     ck_temp = cklist_temp[i]
                     if ck_temp["remarks"] == phone:
@@ -385,9 +385,9 @@ def login_post(cookieKey):
                             put_envs(ck_temp["id"], ck_temp['name'], access_token, phone)
                             # disable_env(ck_temp["id"])
                             # delete_env(ck_temp["id"])
-                if not flag:
-                    print_now(f"自动新增青龙环境：WoChangYouCK  备注为：{phone}")
-                    post_envs("WoChangYouCK", access_token, phone)
+            if not flag:
+                print_now(f"自动新增青龙环境：WoChangYouCK  备注为：{phone}")
+                post_envs("WoChangYouCK", access_token, phone)
                         
     except Exception as e:
         print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{phone}】 登录失败，错误信息：{e}")
