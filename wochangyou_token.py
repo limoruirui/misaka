@@ -437,7 +437,7 @@ if __name__ == "__main__":
                     info['remarks'] = remarks
                 ck_list.append(info)
         else:
-            if remarks is None:
+            if remarks is None or remarks == "":
                 cklist[i]['remarks'] = cklist[i]['value']
             ck_list.append(cklist[i])
     if len(ck_list)<1:
