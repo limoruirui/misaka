@@ -12,7 +12,7 @@
 2. cron说明 晚上12点01分15秒开始执行 可直接使用默认cron，亦可以自行修改
 3. 环境变量说明:
     变量名(必须)： WoChangYouCK  格式： 抓包沃畅游Authorization，填入Authorization值即可
-    单个CK塞多个账号时，以&分隔开：CK1&
+    单个CK塞多个账号时，以#或者@分隔开：CK1#CK2
 注：本脚本可配合另外一个登录抓包脚本使用，自动填入CK
 """
 import requests,re
@@ -371,4 +371,3 @@ if __name__ == "__main__":
             print_now("当前账号未填写 跳过\n")
             continue
         send_post(ck)
-        print_now("\n")
