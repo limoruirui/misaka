@@ -8,8 +8,12 @@
 # -------------------------------
 
 """
-沃畅游密码登录 获取access_token并自动新增或者更新青龙环境
+沃畅游密码登录 获取access_token环境并自动新增或者更新青龙环境
 青龙环境变量：WoChangYouCK_PSW 手机号码&密码  账号和密码分别是联通app的账号和密码
+
+
+
+
 
 """
 import requests,re
@@ -357,7 +361,7 @@ class UnicomLogin:
         self.appid = str(random.randint(0, 10))+"f"+str(random.randint(0, 10))+"af"+str(random.randint(0, 10))+"2ad6912d306b5053abf90c7ebbb695887bc870ae0706d573c348539c26c5c0a878641fcc0d3e90acb9be1e6ef858a59af546f3c826988332376b7d18c8ea2398ee3a9c3db947e2471d32a49612"
 
     def login_unicom(self):
-        print_now(self.phone_num+"---------"+self.password)
+        # print_now(self.phone_num+"---------"+self.password)
         headers = {
             'Host': 'm.client.10010.com',
             'Accept': '*/*',
@@ -385,7 +389,7 @@ class UnicomLogin:
     def get_wo_speed_ticket(self):
         if self.ecs_token == "" or self.ecs_token is None:
             return ""
-
+        
         cookies = {
             'ecs_token': self.ecs_token,
         }
@@ -448,7 +452,7 @@ class UnicomLogin:
             print_now(f'账号【{self.phone_num}】获取access_token失败\n')
             return ""
         try:
-            print_now(f'账号【{self.phone_num}】成功获取到【access_token】：{self.access_token}  请复制保存使用\n')
+            print_now(f'账号【{self.phone_num}】成功获取到【access_token】：{self.access_token}\n请复制保存使用')
             # 获取沃畅游CK
             cklist_temp = get_cookie("WoChangYouCK")
             flag = False
@@ -457,7 +461,7 @@ class UnicomLogin:
                     ck_temp = cklist_temp[i]
                     if ck_temp["remarks"] == phone:
                         flag = True
-                        print_now(f"账号【{self.phone_num}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}")
+                        print_now(f"账号【{self.phone_num}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}\n")
                         if flag == "old":
                             # print("进入旧版本青龙禁用方法")
                             put_envs(ck_temp["_id"], ck_temp['name'], self.access_token, phone)
@@ -469,10 +473,10 @@ class UnicomLogin:
                             # disable_env(ck_temp["id"])
                             # delete_env(ck_temp["id"])
             if not flag:
-                print_now(f"账号【{self.phone_num}】自动新增access_token至青龙环境：WoChangYouCK  备注为：{phone}")
+                print_now(f"账号【{self.phone_num}】自动新增access_token至青龙环境：WoChangYouCK  备注为：{phone}\n")
                 post_envs("WoChangYouCK", self.access_token, phone)
         except Exception as e:
-            print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{phone}】 登录失败，错误信息：{e}")
+            print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{phone}】 登录失败，错误信息：{e}\n")
 
 
     def main(self):
