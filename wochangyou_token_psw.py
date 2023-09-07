@@ -29,7 +29,8 @@ try:
     from Crypto.PublicKey.RSA import importKey, construct
     from Crypto.Cipher import PKCS1_v1_5
 except:
-    print("检测到还未安装 pycryptodome 依赖")
+    print("检测到还未安装 pycryptodome 依赖，请安装")
+    print("如果安装依赖pycryptodome出错时，请先在linux中安装gcc、python3-dev、libc-dev三个依赖")
     exit(0)
 
 
@@ -369,15 +370,15 @@ class UnicomLogin:
             'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
             'Content-Type': 'application/x-www-form-urlencoded',
         }
-        # data = f"isFirstInstall=1&simCount=1&yw_code=&deviceOS=android13&mobile={quote(RSA_Encrypt(self.rsa_key).encrypt(self.phone_num, b64=True))}&netWay=Wifi&version=android%4010.0100&deviceId={self.deviceId}&password={quote(RSA_Encrypt(self.rsa_key).encrypt(self.password, b64=True))}&keyVersion=&provinceChanel=general&appId={self.appid}&deviceModel=V1936A&androidId={uuid4().hex[8:24]}&deviceBrand=&timestamp={datetime.today().__format__('%Y%m%d%H%M%S')}"
+        data = f"isFirstInstall=1&simCount=1&yw_code=&deviceOS=android13&mobile={quote(RSA_Encrypt(self.rsa_key).encrypt(self.phone_num, b64=True))}&netWay=Wifi&version=android%4010.0100&deviceId={self.deviceId}&password={quote(RSA_Encrypt(self.rsa_key).encrypt(self.password, b64=True))}&keyVersion=&provinceChanel=general&appId={self.appid}&deviceModel=V1936A&androidId={uuid4().hex[8:24]}&deviceBrand=&timestamp={datetime.today().__format__('%Y%m%d%H%M%S')}"
 
-        data = {
-            "version": "iphone_c@10.0700",
-            "mobile": quote(RSA_Encrypt(self.rsa_key).encrypt(self.phone_num, b64=True)),
-            "appId": self.appid,
-            "deviceId": self.deviceId,
-            "password": quote(RSA_Encrypt(self.rsa_key).encrypt(self.password, b64=True)),
-        }
+        # data = {
+        #     "version": "iphone_c@10.0700",
+        #     "mobile": quote(RSA_Encrypt(self.rsa_key).encrypt(self.phone_num, b64=True)),
+        #     "appId": self.appid,
+        #     "deviceId": self.deviceId,
+        #     "password": quote(RSA_Encrypt(self.rsa_key).encrypt(self.password, b64=True)),
+        # }
         response = requests.post('https://m.client.10010.com/mobileService/login.htm', headers=headers,data=data)
         data = response.json()
         self.ecs_token = data.get("ecs_token")
