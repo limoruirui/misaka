@@ -10,7 +10,9 @@
 """
 沃畅游密码登录 获取access_token环境并自动新增或者更新青龙环境
 青龙环境变量：WoChangYouCK_PSW 手机号码&密码  账号和密码分别是联通app的账号和密码
-
+wxpusher推送(非必填)
+青龙变量：WoChangYouCK_WXPUSHER_TOKEN   wxpusher推送的token
+青龙变量：WoChangYouCK_WXPUSHER_TOPIC_ID   wxpusher推送的topicId
 
 
 
@@ -34,6 +36,11 @@ except:
     exit(0)
 
 
+
+
+WXPUSHER_TOKEN = '' # wxpusher推送的token
+WXPUSHER_TOPIC_ID = '' # wxpusher推送的topicId
+WXPUSHER_CONTENT_TYPE = 2  # wxpusher推送的样式，1表示文字  2表示html(只发送body标签内部的数据即可，不包括body标签)，默认为2
 # wxpusher消息推送
 def wxpusher(title: str, content: str) -> None:
     """
@@ -316,6 +323,20 @@ def base64_decode(data):
     return message
 
 
+
+# WXPUSHER_TOKEN
+WoChangYouCK_WXPUSHER_TOKEN_temp = get_cookie("WoChangYouCK_WXPUSHER_TOKEN")
+if WoChangYouCK_WXPUSHER_TOKEN_temp != "" and len(WoChangYouCK_WXPUSHER_TOKEN_temp)>0:
+    WXPUSHER_TOKEN = WoChangYouCK_WXPUSHER_TOKEN_temp[0]["value"]
+
+# WXPUSHER_TOPIC_ID
+WoChangYouCK_WXPUSHER_TOPIC_ID_temp = get_cookie("WoChangYouCK_WXPUSHER_TOPIC_ID")
+if WoChangYouCK_WXPUSHER_TOPIC_ID_temp != "" and len(WoChangYouCK_WXPUSHER_TOPIC_ID_temp)>0:
+    WXPUSHER_TOPIC_ID = WoChangYouCK_WXPUSHER_TOPIC_ID_temp[0]["value"]
+
+msg = ""
+
+
 class RSA_Encrypt:
     def __init__(self, key):
         if isinstance(key, str):
@@ -390,7 +411,7 @@ class UnicomLogin:
     def get_wo_speed_ticket(self):
         if self.ecs_token == "" or self.ecs_token is None:
             return ""
-        
+
         cookies = {
             'ecs_token': self.ecs_token,
         }
@@ -449,6 +470,7 @@ class UnicomLogin:
         return d.get('access_token')
 
     def deal_data(self):
+        global msg
         if self.ticket == "" or self.ticket is None:
             print_now(f'账号【{self.phone_num}】获取access_token失败\n')
             return ""
@@ -456,13 +478,12 @@ class UnicomLogin:
             print_now(f'账号【{self.phone_num}】成功获取到【access_token】：{self.access_token}\n请复制保存使用')
             # 获取沃畅游CK
             cklist_temp = get_cookie("WoChangYouCK")
-            flag = False
+            flag_temp = False
             if len(cklist_temp)>0:
                 for i in range(len(cklist_temp)):
                     ck_temp = cklist_temp[i]
                     if ck_temp["remarks"] == phone:
-                        flag = True
-                        print_now(f"账号【{self.phone_num}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}\n")
+                        flag_temp = True
                         if flag == "old":
                             # print("进入旧版本青龙禁用方法")
                             put_envs(ck_temp["_id"], ck_temp['name'], self.access_token, phone)
@@ -473,11 +494,15 @@ class UnicomLogin:
                             put_envs(ck_temp["id"], ck_temp['name'], self.access_token, phone)
                             # disable_env(ck_temp["id"])
                             # delete_env(ck_temp["id"])
-            if not flag:
-                print_now(f"账号【{self.phone_num}】自动新增access_token至青龙环境：WoChangYouCK  备注为：{phone}\n")
+                        print_now(f"账号【{self.phone_num}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}\n")
+                        msg += f"账号【{phone}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}\n\n"
+            if not flag_temp:
                 post_envs("WoChangYouCK", self.access_token, phone)
+                print_now(f"账号【{self.phone_num}】自动新增access_token至青龙环境：WoChangYouCK  备注为：{phone}\n")
+                msg += f"账号【{phone}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}\n\n"
         except Exception as e:
             print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{phone}】 登录失败，错误信息：{e}\n")
+            msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{phone}】 登录失败，错误信息：{e}\n\n"
 
 
     def main(self):
@@ -510,7 +535,7 @@ if __name__ == "__main__":
                 if remarks is None:
                     info['remarks'] = split1[j]
                 else:
-                    info['remarks'] = remarks
+                    info['remarks'] = split1[j].split("&")[0]
                 ck_list.append(info)
         elif len(split2)>1:
             for j in range(len(split2)):
@@ -518,7 +543,7 @@ if __name__ == "__main__":
                 if remarks is None:
                     info['remarks'] = split2[j]
                 else:
-                    info['remarks'] = remarks
+                    info['remarks'] = split2[j].split("&")[0]
                 ck_list.append(info)
         elif len(split3)>1:
             for j in range(len(split3)):
@@ -527,7 +552,7 @@ if __name__ == "__main__":
                 if remarks is None:
                     info['remarks'] = split3[j]
                 else:
-                    info['remarks'] = remarks
+                    info['remarks'] = split3[j].split("&")[0]
                 ck_list.append(info)
         else:
             if remarks is None or remarks == "":
@@ -553,4 +578,6 @@ if __name__ == "__main__":
         password = tmp_list[1]
         print_now(f'开始执行第 {i+1} 个账号：{phone}')
         start(phone,password)
+    if WXPUSHER_TOKEN != "" and WXPUSHER_TOPIC_ID != "" and msg != "":
+        wxpusher("沃畅游密码登录",msg)
 
