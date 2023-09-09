@@ -467,6 +467,9 @@ class UnicomLogin:
 
         response = requests.post('https://game.wostore.cn/api/app/user/v2/login', headers=headers, json=json_data)
         d = response.json().get('data')
+        if not d or d == "":
+            print_now(f"可能是首次登录沃畅游。无法获取access_token，可先手动去联通app首页--5g新通信--联通畅游，登录一下")
+            return ""
         return d.get('access_token')
 
     def deal_data(self):
