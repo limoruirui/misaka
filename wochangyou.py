@@ -14,6 +14,10 @@
     变量名(必须)： WoChangYouCK  格式： 抓包沃畅游Authorization，填入Authorization值即可
     单个CK塞多个账号时，以#或者@分隔开：CK1#CK2
 注：本脚本可配合另外一个登录抓包脚本使用，自动填入CK
+
+wxpusher推送(非必填)
+青龙变量：WoChangYouCK_WXPUSHER_TOKEN   wxpusher推送的token
+青龙变量：WoChangYouCK_WXPUSHER_TOPIC_ID   wxpusher推送的topicId
 """
 import requests,re
 import json, os
@@ -21,6 +25,11 @@ import time
 from sys import stdout
 
 
+
+
+WXPUSHER_TOKEN = '' # wxpusher推送的token
+WXPUSHER_TOPIC_ID = '' # wxpusher推送的topicId
+WXPUSHER_CONTENT_TYPE = 2  # wxpusher推送的样式，1表示文字  2表示html(只发送body标签内部的数据即可，不包括body标签)，默认为2
 # wxpusher消息推送
 def wxpusher(title: str, content: str) -> None:
     """
@@ -45,8 +54,8 @@ def wxpusher(title: str, content: str) -> None:
         "content":f"{content}",
         "summary":f"{title}",
         "contentType":contentType,
-        "topicIds":[ 
-           f'{WXPUSHER_TOPIC_ID}'
+        "topicIds":[
+            f'{WXPUSHER_TOPIC_ID}'
         ],
         "verifyPay":False
     }
@@ -171,7 +180,7 @@ def get_config_and_envs(name: str = None) -> list:
                 #以=分割，查找需要的环境名字
                 tmp = list_all[1].split("=")
                 if len(tmp) > 1:
-                    
+
                     info = tmp[0]
                     if name in info:
                         #print('需要查询的环境数据：{}'.format(tmp))
@@ -188,14 +197,14 @@ def get_config_and_envs(name: str = None) -> list:
                         }
                         if flag == 'old':
                             data_json = {
-                            '_id': None,
-                            'value': tmp[1],
-                            'status': 0,
-                            'name': name,
-                            'remarks': "",
-                            'position': None,
-                            'timestamp': int(time.time()*1000),
-                            'created': int(time.time()*1000)
+                                '_id': None,
+                                'value': tmp[1],
+                                'status': 0,
+                                'name': name,
+                                'remarks': "",
+                                'position': None,
+                                'timestamp': int(time.time()*1000),
+                                'created': int(time.time()*1000)
                             }
                         #print('需要的数据：{}'.format(data_json))
                         data.append(data_json)
@@ -226,19 +235,19 @@ def put_envs(_id: str, name: str, value: str, remarks: str = None) -> bool:
     params = {
         't': int(time.time() * 1000)
     }
-    
+
     data = {
         'name': name,
         'value': value,
         'id': _id
     }
     if flag == 'old':
-       data = {
-        'name': name,
-        'value': value,
-        '_id': _id
-        } 
-    
+        data = {
+            'name': name,
+            'value': value,
+            '_id': _id
+        }
+
     if remarks is not None:
         data['remarks'] = remarks
     res = requests.put(ql_url + '/api/envs', headers=__get__headers(), params=params, json=data)
@@ -287,8 +296,21 @@ def delete_env(_id: str) -> bool:
 
 
 
+# WXPUSHER_TOKEN
+WoChangYouCK_WXPUSHER_TOKEN_temp = get_cookie("WoChangYouCK_WXPUSHER_TOKEN")
+if WoChangYouCK_WXPUSHER_TOKEN_temp != "" and len(WoChangYouCK_WXPUSHER_TOKEN_temp)>0:
+    WXPUSHER_TOKEN = WoChangYouCK_WXPUSHER_TOKEN_temp[0]["value"]
+
+# WXPUSHER_TOPIC_ID
+WoChangYouCK_WXPUSHER_TOPIC_ID_temp = get_cookie("WoChangYouCK_WXPUSHER_TOPIC_ID")
+if WoChangYouCK_WXPUSHER_TOPIC_ID_temp != "" and len(WoChangYouCK_WXPUSHER_TOPIC_ID_temp)>0:
+    WXPUSHER_TOPIC_ID = WoChangYouCK_WXPUSHER_TOPIC_ID_temp[0]["value"]
+
+msg = ""
+
 
 def send_post(ck):
+    global msg
     authorization = ck["value"]
     remarks = ck["remarks"]
     url = 'https://game.wostore.cn/api/app/user/qosSpeedUp/add'
@@ -311,8 +333,10 @@ def send_post(ck):
     try:
         response = requests.post(url, headers=headers, data=json.dumps(data))
         print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】发送成功，响应：{response.json()}")
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】发送成功，响应：{response.json()}\n\n"
     except Exception as e:
         print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 发送失败，错误信息：{e}")
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 发送失败，错误信息：{e}\n\n"
 
 # print_now(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] 脚本已启动，默认每隔15分钟发送一次POST请求\n")
 
@@ -348,7 +372,7 @@ if __name__ == "__main__":
         elif len(split3)>1:
             for j in range(len(split3)):
                 info['value'] = split3[j]
-                
+
                 if remarks is None:
                     info['remarks'] = split3[j]
                 else:
@@ -361,9 +385,9 @@ if __name__ == "__main__":
     if len(ck_list)<1:
         print_now('未添加CK,退出程序~')
         exit(0)
-    
 
-            
+
+
     for i in range(len(ck_list)):
         ck = ck_list[i]
         print_now(f'开始执行第 {i+1} 个账号')
@@ -371,3 +395,6 @@ if __name__ == "__main__":
             print_now("当前账号未填写 跳过\n")
             continue
         send_post(ck)
+        print_now("\n")
+    if WXPUSHER_TOKEN != "" and WXPUSHER_TOPIC_ID != "" and msg != "":
+        wxpusher("沃畅游短信登录",msg)
