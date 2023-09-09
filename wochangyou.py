@@ -2,33 +2,30 @@
 # -- coding: utf-8 --
 # -------------------------------
 # @Author : github@yuanter https://github.com/yuanter  by院长
-# @Time : 2023/9/6 18:25
-# cron "1 1 1 1 1" script-path=xxx.py,tag=匹配cron用
-# const $ = new Env('沃畅游短信登录');
+# @Time : 2023/9/4 02:25
+# cron "15 1 0 * * *" script-path=xxx.py,tag=匹配cron用
+# const $ = new Env('沃畅游破限速');
 # -------------------------------
 
 """
-沃畅游短信登录 获取access_token环境并自动新增或者更新青龙环境
-青龙变量：WoChangYouCK_Phone 手机号码
-青龙变量：WoChangYouCK_Code 验证码
+1. 沃畅游破限速 支持多账号执行 需要抓包沃畅游，找Authorization值 脚本仅供学习交流使用, 请在下载后24h内删除
+2. cron说明 晚上12点01分15秒开始执行 可直接使用默认cron，亦可以自行修改
+3. 环境变量说明:
+    变量名(必须)： WoChangYouCK  格式： 抓包沃畅游Authorization，填入Authorization值即可
+    单个CK塞多个账号时，以#或者@分隔开：CK1#CK2
+注：本脚本可配合另外一个登录抓包脚本使用，自动填入CK
+
 wxpusher推送(非必填)
 青龙变量：WoChangYouCK_WXPUSHER_TOKEN   wxpusher推送的token
 青龙变量：WoChangYouCK_WXPUSHER_TOPIC_ID   wxpusher推送的topicId
-
-步骤：
-1. 先填写变量WoChangYouCK_Phone(手机号)，然后执行本脚本
-2. 获取到验证码后，再填入变量WoChangYouCK_Code(验证码)，再次执行脚本
-
-请注意：
-变量WoChangYouCK_Code不存在时，会执行发送验证码操作
-变量WoChangYouCK_Code存在时，会自动登录并生成青龙环境WoChangYouCK，同时会在青龙环境备注上手机号。或者自己根据日志自行复制access_token值
-
 """
 import requests,re
 import json, os
 import time
 from sys import stdout
-import base64
+
+
+
 
 WXPUSHER_TOKEN = '' # wxpusher推送的token
 WXPUSHER_TOPIC_ID = '' # wxpusher推送的topicId
@@ -299,23 +296,6 @@ def delete_env(_id: str) -> bool:
 
 
 
-
-def base64_encode(data):
-    message_bytes = data.encode('utf-8')  # 将字符串转换为字节型
-    base64_data = base64.b64encode(message_bytes)  #进行加密
-    # base64_data = base64.b64encode(data)  # 进行加密
-    # print(base64_data,type(base64_data),len(base64_data))
-    base64_data = base64_data.decode('utf-8')
-    return base64_data
-
-def base64_decode(data):
-    #base64_bytes = data.encode('utf-8')
-    message_bytes = base64.b64decode(data)
-    message = message_bytes.decode('utf-8')
-    return message
-
-
-
 # WXPUSHER_TOKEN
 WoChangYouCK_WXPUSHER_TOKEN_temp = get_cookie("WoChangYouCK_WXPUSHER_TOKEN")
 if WoChangYouCK_WXPUSHER_TOKEN_temp != "" and len(WoChangYouCK_WXPUSHER_TOKEN_temp)>0:
@@ -326,45 +306,16 @@ WoChangYouCK_WXPUSHER_TOPIC_ID_temp = get_cookie("WoChangYouCK_WXPUSHER_TOPIC_ID
 if WoChangYouCK_WXPUSHER_TOPIC_ID_temp != "" and len(WoChangYouCK_WXPUSHER_TOPIC_ID_temp)>0:
     WXPUSHER_TOPIC_ID = WoChangYouCK_WXPUSHER_TOPIC_ID_temp[0]["value"]
 
-
-phone = ""
 msg = ""
 
 
 def send_post(ck):
-    phone = ck["value"]
-    phone = base64_encode(phone)
-    remarks = ck["remarks"]
-    url = 'https://game.wostore.cn/api/app/user/v3/getVerificationCode'
-    headers = {
-        'authorization': '',
-        'Content-Type': 'application/json;charset=utf-8',
-        "versioncode": "4016",
-        "channelid": "GAMELTJS_10001",
-        "device": "1",
-        "rnversion": "0",
-        "Host": "game.wostore.cn",
-        "User-Agent": "okhttp/4.9.2",
-        "Accept-Encoding":"gzip"
-    }
-    data = {"phone":phone }
-
-    try:
-        response = requests.post(url, headers=headers, data=json.dumps(data))
-        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 短信发送成功，响应：{response.json()}")
-    except Exception as e:
-        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 短信发送失败，错误信息：{e}")
-
-
-def login_post(cookieKey):
-    global phone
     global msg
-    code = cookieKey["value"]
-    code = base64_encode(code)
-    new_phone = base64_encode(phone)
-    url = 'https://game.wostore.cn/api/app/user/v3/login'
+    authorization = ck["value"]
+    remarks = ck["remarks"]
+    url = 'https://game.wostore.cn/api/app/user/qosSpeedUp/add'
     headers = {
-        'authorization': '',
+        'authorization': authorization,
         'Content-Type': 'application/json;charset=utf-8',
         "versioncode": "4016",
         "channelid": "GAMELTJS_10001",
@@ -374,56 +325,25 @@ def login_post(cookieKey):
         "User-Agent": "okhttp/4.9.2",
         "Accept-Encoding":"gzip"
     }
-    data = {"identityType":"phoneVerificationCode","identifier": new_phone,"code":code}
+    data = {
+        'firstTime': '00:00-12:00',
+        'secondTime': '12:00-23:59'
+    }
 
     try:
         response = requests.post(url, headers=headers, data=json.dumps(data))
-        text = response.json()
-        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{phone}】 登录成功，响应：{text}\n")
-        if text["code"] == 200:
-            data = text["data"]
-            access_token = data["access_token"]
-            print_now(f'成功获取access_token: {access_token}  请复制保存使用\n')
-            # 获取沃畅游CK
-            cklist_temp = get_cookie("WoChangYouCK")
-            flag_temp = False
-            if len(cklist_temp)>0:
-                for i in range(len(cklist_temp)):
-                    ck_temp = cklist_temp[i]
-                    if ck_temp["remarks"] == phone:
-                        flag_temp = True
-                        if flag == "old":
-                            # print("进入旧版本青龙禁用方法")
-                            put_envs(ck_temp["_id"], ck_temp['name'], access_token, phone)
-                            # disable_env(ck_temp["_id"])
-                            # delete_env(ck_temp["_id"])
-                        elif flag == "new":
-                            # print("进入新版本青龙禁用方法")
-                            put_envs(ck_temp["id"], ck_temp['name'], access_token, phone)
-                            # disable_env(ck_temp["id"])
-                            # delete_env(ck_temp["id"])
-                        print_now(f"账号【{phone}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}")
-                        msg += f"账号【{phone}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}\n\n"
-            if not flag_temp:
-                post_envs("WoChangYouCK", access_token, phone)
-                print_now(f"账号【{phone}】自动新增access_token至青龙环境：WoChangYouCK  备注为：{phone}")
-                msg += f"账号【{phone}】自动新增access_token至青龙环境：WoChangYouCK  备注为：{phone}\n\n"
-                
-
+        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】发送成功，响应：{response.json()}")
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】发送成功，响应：{response.json()}\n\n"
     except Exception as e:
-        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{phone}】 登录失败，错误信息：{e}")
-        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{phone}】 登录失败，错误信息：{e}\n\n"
-
-
-
-
+        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 发送失败，错误信息：{e}")
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 发送失败，错误信息：{e}\n\n"
 
 # print_now(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] 脚本已启动，默认每隔15分钟发送一次POST请求\n")
 
 if __name__ == "__main__":
     l = []
     ck_list = []
-    cklist = get_cookie("WoChangYouCK_Phone")
+    cklist = get_cookie("WoChangYouCK")
     for i in range(len(cklist)):
         info = {}
         #多账号以#分割开的ck
@@ -439,7 +359,7 @@ if __name__ == "__main__":
                 if remarks is None:
                     info['remarks'] = split1[j]
                 else:
-                    info['remarks'] = split1[j].split("&")[0]
+                    info['remarks'] = remarks
                 ck_list.append(info)
         elif len(split2)>1:
             for j in range(len(split2)):
@@ -447,7 +367,7 @@ if __name__ == "__main__":
                 if remarks is None:
                     info['remarks'] = split2[j]
                 else:
-                    info['remarks'] = split2[j].split("&")[0]
+                    info['remarks'] = remarks
                 ck_list.append(info)
         elif len(split3)>1:
             for j in range(len(split3)):
@@ -456,10 +376,10 @@ if __name__ == "__main__":
                 if remarks is None:
                     info['remarks'] = split3[j]
                 else:
-                    info['remarks'] = split3[j].split("&")[0]
+                    info['remarks'] = remarks
                 ck_list.append(info)
         else:
-            if remarks is None or remarks == "":
+            if remarks is None:
                 cklist[i]['remarks'] = cklist[i]['value']
             ck_list.append(cklist[i])
     if len(ck_list)<1:
@@ -470,15 +390,11 @@ if __name__ == "__main__":
 
     for i in range(len(ck_list)):
         ck = ck_list[i]
-        phone = ck.get("value",None)
-        if phone is None:
+        print_now(f'开始执行第 {i+1} 个账号')
+        if ck is None:
             print_now("当前账号未填写 跳过\n")
             continue
-        print_now(f'开始执行第 {i+1} 个账号：{phone}')
-        code_list = get_cookie("WoChangYouCK_Code")
-        if len(code_list)>0:
-            login_post(code_list[0])
-        else:
-            send_post(ck)
+        send_post(ck)
+        print_now("\n")
     if WXPUSHER_TOKEN != "" and WXPUSHER_TOPIC_ID != "" and msg != "":
         wxpusher("沃畅游破限速",msg)
