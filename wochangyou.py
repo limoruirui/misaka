@@ -67,6 +67,7 @@ def wxpusher(title: str, content: str) -> None:
         print("wxpusher推送成功！")
     else:
         print("wxpusher推送失败！")
+        print(f"wxpusher推送出错响应内容：{response}" )
 
 
 ql_auth_path = '/ql/data/config/auth.json'
