@@ -70,6 +70,7 @@ def wxpusher(title: str, content: str) -> None:
         print("wxpusher推送成功！")
     else:
         print("wxpusher推送失败！")
+        print(f"wxpusher推送出错响应内容：{response}" )
 
 
 ql_auth_path = '/ql/data/config/auth.json'
@@ -408,7 +409,7 @@ def login_post(cookieKey):
                 post_envs("WoChangYouCK", access_token, phone)
                 print_now(f"账号【{phone}】自动新增access_token至青龙环境：WoChangYouCK  备注为：{phone}")
                 msg += f"账号【{phone}】自动新增access_token至青龙环境：WoChangYouCK  备注为：{phone}\n\n"
-                
+
 
     except Exception as e:
         print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{phone}】 登录失败，错误信息：{e}")
