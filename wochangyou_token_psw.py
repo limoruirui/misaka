@@ -78,6 +78,7 @@ def wxpusher(title: str, content: str) -> None:
         print("wxpusher推送成功！")
     else:
         print("wxpusher推送失败！")
+        print(f"wxpusher推送出错响应内容：{response}" )
 
 
 ql_auth_path = '/ql/data/config/auth.json'
@@ -381,6 +382,8 @@ class UnicomLogin:
         self.password = password.rstrip("\n")
         self.deviceId = uuid4().hex
         self.appid = str(random.randint(0, 10))+"f"+str(random.randint(0, 10))+"af"+str(random.randint(0, 10))+"2ad6912d306b5053abf90c7ebbb695887bc870ae0706d573c348539c26c5c0a878641fcc0d3e90acb9be1e6ef858a59af546f3c826988332376b7d18c8ea2398ee3a9c3db947e2471d32a49612"
+        self.access_token = ""
+
 
     def login_unicom(self):
         # print_now(self.phone_num+"---------"+self.password)
@@ -407,7 +410,7 @@ class UnicomLogin:
         print_now(f'账号【{self.phone_num}】成功获取到【token_online】：{self.token_online}\n账号【{self.phone_num}】成功获取到【ecs_token】：{self.ecs_token}\n账号【{self.phone_num}】成功获取到【appid】：{self.appid}')
         return self.ecs_token
 
-
+    # 方式一登录
     def get_wo_speed_ticket(self):
         if self.ecs_token == "" or self.ecs_token is None:
             return ""
@@ -439,7 +442,7 @@ class UnicomLogin:
         return location[location.find("ticket=") + len('ticket='):location.rfind("&versio")]
 
 
-    def wo_speed_login(self):
+    def wo_speed_login_one(self):
         if self.ticket == "" or self.ticket is None:
             return ""
         headers = {
@@ -470,11 +473,89 @@ class UnicomLogin:
         if not d or d == "":
             print_now(f"可能是首次登录沃畅游。无法获取access_token，可先手动去联通app首页--5g新通信--联通畅游，登录一下")
             return ""
-        return d.get('access_token')
+        access_token = d.get('access_token',None)
+        if not access_token and access_token != "":
+            return access_token
+        else:
+            print_now(f"可能是首次登录沃畅游。无法获取access_token，可先手动去联通app首页--5g新通信--联通畅游，登录一下")
+            return ""
+
+
+
+    # 方式二登录
+    def wo_speed_login_two(self):
+        if self.ecs_token == "" or self.ecs_token is None:
+            return ""
+        count = 0
+        while True:
+            if count < 3 and self.access_token == "":
+                count = self.login(count)
+            else:
+                break
+        if self.access_token == "":
+            print_now(f"可能是首次登录沃畅游。无法获取access_token，可先手动去联通app首页--5g新通信--联通畅游，登录一下")
+
+
+    def login(self,count):
+        url = 'https://m.client.10010.com/mobileService/openPlatform/openPlatLineNew.htm?to_url=https://web.wostore.cn/web/flowGame/index.html?channelId=GAMELTAPP_90006&pushid=99'
+        headers = {
+            'Content-Type': 'application/json;charset=utf-8',
+            # "User-Agent": "Mozilla/5.0 (Linux; Android 13; LE2100 Build/TP1A.220905.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/103.0.5060.129 Mobile Safari/537.36; unicom{version:android@10.0600,desmobile:"+self.phone_num+"};devicetype{deviceBrand:OnePlus,deviceModel:LE2100};{yw_code:}",
+            "Cookie": "ecs_token=" + self.ecs_token
+        }
+        try:
+            response = requests.get(url, headers=headers,allow_redirects=False)
+            # print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{self.phone_num}】发送成功，响应：{response.headers}")
+            # 获取location
+            location = response.headers.get("location",None)
+            headers["User-Agent"] = "Mozilla/5.0 (Linux; Android 13; LE2100 Build/TP1A.220905.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/103.0.5060.129 Mobile Safari/537.36; unicom{version:android@10.0600,desmobile:"+self.phone_num+"};devicetype{deviceBrand:OnePlus,deviceModel:LE2100};{yw_code:}"
+            # 获取ticket、channelId
+            ticket = ""
+            channelId = ""
+
+            if location is not None and location != "":
+                key_value = location.split("?")[1].split("&")
+                for i in range(len(key_value)):
+                    key_value_temp = key_value[i].split("=")
+                    if key_value_temp[0] == "ticket":
+                        ticket = key_value_temp[1]
+                    if key_value_temp[0] == "channelId":
+                        channelId = key_value_temp[1]
+
+            # 登录
+            url = 'https://web.wostore.cn/api/app//user/v2/login'
+            headers["channelId"]  = channelId
+            data = {
+                'identityType': 'esToken',
+                'code': self.ecs_token,
+                'ticket': ticket,
+                'uuid': "3cc1b0ff-ddb4-49dc-9e87-4d51811f7ea1"
+            }
+            # print_now(f'location：{location}\ticket：{ticket}\nheaders:{headers}\ndata:{data}')
+            response = requests.post(url, headers=headers, data=json.dumps(data))
+            text = response.json()
+            # print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{self.phone_num}】 登录成功，响应：{text}\n")
+            self.access_token = ""
+            if text["code"] == 200:
+                data = text["data"]
+                access_token = data["access_token"]
+                # print_now(f'账号{self.phone_num}登录成功，成功获取access_token,额外需要使用时请复制保存: {access_token}\n')
+                self.access_token = access_token
+            else:
+                print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{self.phone_num}】 登录请求响应：{text}\n")
+                self.access_token = ""
+                count += 1
+        except Exception as e:
+            count += 1
+            print_now(f"\n\n账号{self.phone_num}登录请求出现错误,出错响应内容：{e}\n\n正在第{count}次重试中。。。" )
+            self.access_token = ""
+        return count
+
+
 
     def deal_data(self):
         global msg
-        if self.ticket == "" or self.ticket is None:
+        if self.access_token == "" or self.access_token is None:
             print_now(f'账号【{self.phone_num}】获取access_token失败\n')
             return ""
         try:
@@ -510,8 +591,11 @@ class UnicomLogin:
 
     def main(self):
         self.login_unicom()
-        self.ticket = self.get_wo_speed_ticket()
-        self.access_token = self.wo_speed_login()
+        # 方式一登录
+        # self.ticket = self.get_wo_speed_ticket()
+        # self.access_token = self.wo_speed_login_one()
+        # 方式二登录
+        self.wo_speed_login_two()
         self.deal_data()
 
 
