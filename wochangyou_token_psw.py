@@ -557,6 +557,7 @@ class UnicomLogin:
         global msg
         if self.access_token == "" or self.access_token is None:
             print_now(f'账号【{self.phone_num}】获取access_token失败\n')
+            msg += f'账号【{self.phone_num}】获取access_token失败\n\n'
             return ""
         try:
             print_now(f'账号【{self.phone_num}】成功获取到【access_token】：{self.access_token}\n请复制保存使用')
@@ -620,28 +621,19 @@ if __name__ == "__main__":
             for j in range(len(split1)):
                 info = {}
                 info['value'] = split1[j]
-                if remarks is None:
-                    info['remarks'] = split1[j]
-                else:
-                    info['remarks'] = split1[j].split("&")[0]
+                info['remarks'] = split1[j].split("&")[0]
                 ck_list.append(info)
         elif len(split2)>1:
             for j in range(len(split2)):
                 info = {}
                 info['value'] = split2[j]
-                if remarks is None:
-                    info['remarks'] = split2[j]
-                else:
-                    info['remarks'] = split2[j].split("&")[0]
+                info['remarks'] = split2[j].split("&")[0]
                 ck_list.append(info)
         elif len(split3)>1:
             for j in range(len(split3)):
                 info = {}
                 info['value'] = split3[j]
-                if remarks is None:
-                    info['remarks'] = split3[j]
-                else:
-                    info['remarks'] = split3[j].split("&")[0]
+                info['remarks'] = split3[j].split("&")[0]
                 ck_list.append(info)
         else:
             if remarks is None or remarks == "":
