@@ -346,7 +346,7 @@ if __name__ == "__main__":
     ck_list = []
     cklist = get_cookie("WoChangYouCK")
     for i in range(len(cklist)):
-        info = {}
+        
         #多账号以#分割开的ck
         split1 = cklist[i]['value'].split("#")
         #多账号以@分割开的ck
@@ -356,6 +356,7 @@ if __name__ == "__main__":
         remarks = cklist[i].get("remarks",None)
         if len(split1)>1:
             for j in range(len(split1)):
+                info = {}
                 info['value'] = split1[j]
                 if remarks is None:
                     info['remarks'] = split1[j]
@@ -364,6 +365,7 @@ if __name__ == "__main__":
                 ck_list.append(info)
         elif len(split2)>1:
             for j in range(len(split2)):
+                info = {}
                 info['value'] = split2[j]
                 if remarks is None:
                     info['remarks'] = split2[j]
@@ -372,8 +374,8 @@ if __name__ == "__main__":
                 ck_list.append(info)
         elif len(split3)>1:
             for j in range(len(split3)):
+                info = {}
                 info['value'] = split3[j]
-
                 if remarks is None:
                     info['remarks'] = split3[j]
                 else:
