@@ -393,21 +393,27 @@ def login_post(cookieKey):
                     ck_temp = cklist_temp[i]
                     if ck_temp["remarks"] == phone:
                         flag_temp = True
+                        put_flag = True
                         if flag == "old":
                             _id = ck_temp.get("_id",None)
                             if not _id:
                                 _id = ck_temp["id"]
-                            put_envs(_id, ck_temp['name'], access_token, phone)
+                            put_flag = put_envs(_id, ck_temp['name'], access_token, phone)
                             # print("进入旧版本青龙禁用方法")
                             # disable_env(_id)
                             # delete_env(_id)
                         elif flag == "new":
-                            put_envs(ck_temp["id"], ck_temp['name'], access_token, phone)
+                            put_flag = put_envs(ck_temp["id"], ck_temp['name'], access_token, phone)
                             # print("进入新版本青龙禁用方法")
                             # disable_env(ck_temp["id"])
                             # delete_env(ck_temp["id"])
-                        print_now(f"账号【{phone}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}")
-                        msg += f"账号【{phone}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}\n\n"
+
+                        if put_flag:
+                            print_now(f"账号【{phone}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}")
+                            msg += f"账号【{phone}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}\n\n"
+                        else:
+                            print_now(f"账号【{phone}】自动更新access_token至青龙环境：失败")
+                            msg += f"账号【{phone}】自动更新access_token至青龙环境：失败\n\n"
             if not flag_temp:
                 post_envs("WoChangYouCK", access_token, phone)
                 print_now(f"账号【{phone}】自动新增access_token至青龙环境：WoChangYouCK  备注为：{phone}")
