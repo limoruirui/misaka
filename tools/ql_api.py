@@ -189,7 +189,7 @@ def post_envs(name: str, value: str, remarks: str = None) -> list:
     return []
 
 
-# 修改环境变量
+# 修改环境变量(2.11.x版本有问题，属于旧版青龙，但是id属于新版本)
 def put_envs(_id: str, name: str, value: str, remarks: str = None) -> bool:
     params = {
         't': int(time.time() * 1000)
@@ -207,6 +207,47 @@ def put_envs(_id: str, name: str, value: str, remarks: str = None) -> bool:
         '_id': _id
         } 
     
+    if remarks is not None:
+        data['remarks'] = remarks
+    res = requests.put(ql_url + '/api/envs', headers=__get__headers(), params=params, json=data)
+    j_data = res.json()
+    if j_data['code'] == 200:
+        return True
+    return False
+
+# 修改环境变量1，青龙2.11.0以下版本（不含2.11.0）
+def put_envs_old(_id: str, name: str, value: str, remarks: str = None) -> bool:
+    params = {
+        't': int(time.time() * 1000)
+    }
+
+    data = {
+        'name': name,
+        'value': value,
+        '_id': _id
+    }
+
+    if remarks is not None:
+        data['remarks'] = remarks
+    res = requests.put(ql_url + '/api/envs', headers=__get__headers(), params=params, json=data)
+    j_data = res.json()
+    if j_data['code'] == 200:
+        return True
+    return False
+
+
+# 修改环境变量2，青龙2.11.0以上版本（含2.11.0）
+def put_envs_new(_id: int, name: str, value: str, remarks: str = None) -> bool:
+    params = {
+        't': int(time.time() * 1000)
+    }
+
+    data = {
+        'name': name,
+        'value': value,
+        'id': _id
+    }
+
     if remarks is not None:
         data['remarks'] = remarks
     res = requests.put(ql_url + '/api/envs', headers=__get__headers(), params=params, json=data)
