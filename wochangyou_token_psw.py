@@ -242,8 +242,29 @@ def post_envs(name: str, value: str, remarks: str = None) -> list:
     return []
 
 
-# 修改环境变量
-def put_envs(_id, name: str, value: str, remarks: str = None) -> bool:
+# 修改环境变量1，青龙2.11.0以下版本（不含2.11.0）
+def put_envs_old(_id: str, name: str, value: str, remarks: str = None) -> bool:
+    params = {
+        't': int(time.time() * 1000)
+    }
+
+    data = {
+        'name': name,
+        'value': value,
+        '_id': _id
+    }
+
+    if remarks is not None:
+        data['remarks'] = remarks
+    res = requests.put(ql_url + '/api/envs', headers=__get__headers(), params=params, json=data)
+    j_data = res.json()
+    if j_data['code'] == 200:
+        return True
+    return False
+
+
+# 修改环境变量2，青龙2.11.0以上版本（含2.11.0）
+def put_envs_new(_id: int, name: str, value: str, remarks: str = None) -> bool:
     params = {
         't': int(time.time() * 1000)
     }
@@ -253,12 +274,6 @@ def put_envs(_id, name: str, value: str, remarks: str = None) -> bool:
         'value': value,
         'id': _id
     }
-    if flag == 'old':
-        data = {
-            'name': name,
-            'value': value,
-            '_id': _id
-        }
 
     if remarks is not None:
         data['remarks'] = remarks
@@ -574,12 +589,14 @@ class UnicomLogin:
                             _id = ck_temp.get("_id",None)
                             if not _id:
                                 _id = ck_temp["id"]
-                            put_flag = put_envs(_id, ck_temp['name'], self.access_token, phone)
+                                put_flag = put_envs_new(_id, ck_temp['name'], self.access_token, phone)
+                            else:
+                                put_flag = put_envs_old(_id, ck_temp['name'], self.access_token, phone)
                             # print("进入旧版本青龙禁用方法")
                             # disable_env(_id)
                             # delete_env(_id)
                         elif flag == "new":
-                            put_flag = put_envs(ck_temp["id"], ck_temp['name'], self.access_token, phone)
+                            put_flag = put_envs_new(ck_temp["id"], ck_temp['name'], self.access_token, phone)
                             # print("进入新版本青龙禁用方法")
                             # disable_env(ck_temp["id"])
                             # delete_env(ck_temp["id"])
