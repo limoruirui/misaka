@@ -231,8 +231,29 @@ def post_envs(name: str, value: str, remarks: str = None) -> list:
     return []
 
 
-# 修改环境变量
-def put_envs(_id: str, name: str, value: str, remarks: str = None) -> bool:
+# 修改环境变量1，青龙2.11.0以下版本（不含2.11.0）
+def put_envs_old(_id: str, name: str, value: str, remarks: str = None) -> bool:
+    params = {
+        't': int(time.time() * 1000)
+    }
+
+    data = {
+        'name': name,
+        'value': value,
+        '_id': _id
+    }
+
+    if remarks is not None:
+        data['remarks'] = remarks
+    res = requests.put(ql_url + '/api/envs', headers=__get__headers(), params=params, json=data)
+    j_data = res.json()
+    if j_data['code'] == 200:
+        return True
+    return False
+
+
+# 修改环境变量2，青龙2.11.0以上版本（含2.11.0）
+def put_envs_new(_id: int, name: str, value: str, remarks: str = None) -> bool:
     params = {
         't': int(time.time() * 1000)
     }
@@ -242,12 +263,6 @@ def put_envs(_id: str, name: str, value: str, remarks: str = None) -> bool:
         'value': value,
         'id': _id
     }
-    if flag == 'old':
-        data = {
-            'name': name,
-            'value': value,
-            '_id': _id
-        }
 
     if remarks is not None:
         data['remarks'] = remarks
@@ -333,11 +348,11 @@ def send_post(ck):
 
     try:
         response = requests.post(url, headers=headers, data=json.dumps(data))
-        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】发送成功，响应：{response.json()}")
-        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】发送成功，响应：{response.json()}\n\n"
+        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】请求发送成功，响应：{response.json()}")
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】请求发送成功，响应：{response.json()}\n\n"
     except Exception as e:
-        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 发送失败，错误信息：{e}")
-        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 发送失败，错误信息：{e}\n\n"
+        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 请求发送失败，错误信息：{e}")
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 请求发送失败，错误信息：{e}\n\n"
 
 # print_now(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] 脚本已启动，默认每隔15分钟发送一次POST请求\n")
 
@@ -346,7 +361,7 @@ if __name__ == "__main__":
     ck_list = []
     cklist = get_cookie("WoChangYouCK")
     for i in range(len(cklist)):
-        
+
         #多账号以#分割开的ck
         split1 = cklist[i]['value'].split("#")
         #多账号以@分割开的ck
