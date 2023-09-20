@@ -394,14 +394,14 @@ def send_speed_add(ck):
         "versioncode": "4016",
         "channelid": "GAMELTJS_10001",
         "device": "1",
-        "rnversion": "0",
+        "rnversion": "undefined",
         "Host": "game.wostore.cn",
         "User-Agent": "okhttp/4.9.2",
         "Accept-Encoding":"gzip"
     }
     data = {
-        'firstTime': '00:00-12:00',
-        'secondTime': '12:00-23:59'
+        'firstTime': '00:00-23:30',
+        'secondTime': '23:30-23:59'
     }
 
     try:
