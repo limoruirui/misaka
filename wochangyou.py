@@ -325,7 +325,65 @@ if WoChangYouCK_WXPUSHER_TOPIC_ID_temp != "" and len(WoChangYouCK_WXPUSHER_TOPIC
 msg = ""
 
 
-def send_post(ck):
+def send_speed_start(ck):
+    authorization = ck["value"]
+    remarks = ck["remarks"]
+    headers = {
+        'Host': 'game.wostore.cn',
+        'channelid': 'GAMELTJS_10001',
+        'Accept': 'application/json',
+        'Authorization': authorization,
+        'rnversion': 'undefined',
+        'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
+        'Content-Type': 'application/json;charset=utf-8',
+        'versioncode': '4014',
+        'User-Agent': 'GloudGame/68 CFNetwork/1312 Darwin/21.0.0',
+        'device': '2',
+    }
+
+    json_data = {
+        'channelId': 'GAMELTJS_10001',
+        'privateIp': '10.117.226.153',
+    }
+
+    try:
+        response = requests.post('https://game.wostore.cn/api/app/user/v3/qos/start', headers=headers, json=json_data)
+        # print(response.text)
+        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】加速发送成功，响应：{response.json()}")
+    except Exception as e:
+        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】加速发送失败，错误信息：{e}")
+    
+
+
+def get_member_info(ck):
+    authorization = ck["value"]
+    remarks = ck["remarks"]
+    headers = {
+        'Host': 'game.wostore.cn',
+        'Authorization': authorization,
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1 Edg/109.0.0.0',
+        'Content-Type': 'application/json;charset=utf-8',
+        'accept': 'application/json',
+        'channelId': 'GAMELTAPP_90005',
+        'device': '8',
+        'Origin': 'https://web.wostore.cn',
+        'Sec-Fetch-Site': 'same-site',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Dest': 'empty',
+        'Referer': 'https://web.wostore.cn/',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
+    }
+
+    try:
+        response = requests.get('https://game.wostore.cn/api/app/user/v3/getMemberInfo', headers=headers)
+        # print(response.text)
+        # print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】获取个人信息发送成功，响应：{response.json()}")
+    except Exception as e:
+        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】获取个人信息发送失败，错误信息：{e}")
+    
+
+
+def send_speed_add(ck):
     global msg
     authorization = ck["value"]
     remarks = ck["remarks"]
@@ -348,13 +406,12 @@ def send_post(ck):
 
     try:
         response = requests.post(url, headers=headers, data=json.dumps(data))
-        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】请求发送成功，响应：{response.json()}")
-        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】请求发送成功，响应：{response.json()}\n\n"
+        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】添加加速时间发送成功，响应：{response.json()}")
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】添加加速时间发送成功，响应：{response.json()}\n\n"
     except Exception as e:
-        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 请求发送失败，错误信息：{e}")
-        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 请求发送失败，错误信息：{e}\n\n"
+        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 添加加速时间发送失败，错误信息：{e}")
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】添加加速时间发送失败，错误信息：{e}\n\n"
 
-# print_now(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] 脚本已启动，默认每隔15分钟发送一次POST请求\n")
 
 if __name__ == "__main__":
     l = []
@@ -412,7 +469,9 @@ if __name__ == "__main__":
         if ck is None:
             print_now("当前账号未填写 跳过\n")
             continue
-        send_post(ck)
+        get_member_info(ck)
+        send_speed_add(ck)
+        send_speed_start(ck)
         print_now("\n")
     if WXPUSHER_TOKEN != "" and WXPUSHER_TOPIC_ID != "" and msg != "":
         wxpusher("沃畅游破限速",msg)
