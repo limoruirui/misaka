@@ -326,6 +326,7 @@ msg = ""
 
 
 def send_speed_start(ck):
+    global msg
     authorization = ck["value"]
     remarks = ck["remarks"]
     headers = {
@@ -350,8 +351,10 @@ def send_speed_start(ck):
         response = requests.post('https://game.wostore.cn/api/app/user/v3/qos/start', headers=headers, json=json_data)
         # print(response.text)
         print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】加速发送成功，响应：{response.json()}")
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】加速发送成功，响应：{response.json()}\n\n"
     except Exception as e:
         print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】加速发送失败，错误信息：{e}")
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】加速发送失败，错误信息：{e}\n\n"
     
 
 
@@ -407,10 +410,10 @@ def send_speed_add(ck):
     try:
         response = requests.post(url, headers=headers, data=json.dumps(data))
         print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】添加加速时间发送成功，响应：{response.json()}")
-        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】添加加速时间发送成功，响应：{response.json()}\n\n"
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】添加加速时间发送成功，响应：{response.json()}"
     except Exception as e:
         print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 添加加速时间发送失败，错误信息：{e}")
-        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】添加加速时间发送失败，错误信息：{e}\n\n"
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】添加加速时间发送失败，错误信息：{e}"
 
 
 if __name__ == "__main__":
