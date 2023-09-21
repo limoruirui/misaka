@@ -31,7 +31,7 @@ try:
     from Crypto.PublicKey.RSA import importKey, construct
     from Crypto.Cipher import PKCS1_v1_5
 except:
-    print("检测到还未安装 pycryptodome 依赖，请安装")
+    print("检测到还未安装 pycryptodome 依赖，请先在python中安装 pycryptodome 依赖")
     print("如果安装依赖pycryptodome出错时，请先在linux中安装gcc、python3-dev、libc-dev三个依赖")
     exit(0)
 
