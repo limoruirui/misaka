@@ -338,7 +338,8 @@ def send_speed_start(ck):
         'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
         'Content-Type': 'application/json;charset=utf-8',
         'versioncode': '4014',
-        'User-Agent': 'GloudGame/68 CFNetwork/1312 Darwin/21.0.0',
+        # 'User-Agent': 'GloudGame/68 CFNetwork/1312 Darwin/21.0.0',
+        'User-Agent': 'ChinaUnicom.x CFNetwork iOS/15.0.1 unicom{version:iphone_c@10.0700}',
         'device': '2',
     }
 
@@ -355,7 +356,7 @@ def send_speed_start(ck):
     except Exception as e:
         print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】加速发送失败，错误信息：{e}")
         msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】加速发送失败，错误信息：{e}\n\n"
-    
+
 
 
 def get_member_info(ck):
@@ -383,7 +384,7 @@ def get_member_info(ck):
         # print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】获取个人信息发送成功，响应：{response.json()}")
     except Exception as e:
         print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】获取个人信息发送失败，错误信息：{e}")
-    
+
 
 
 def send_speed_add(ck):
@@ -399,7 +400,8 @@ def send_speed_add(ck):
         "device": "1",
         "rnversion": "undefined",
         "Host": "game.wostore.cn",
-        "User-Agent": "okhttp/4.9.2",
+        # "User-Agent": "okhttp/4.9.2",
+        'User-Agent': 'ChinaUnicom.x CFNetwork iOS/15.0.1 unicom{version:iphone_c@10.0700}',
         "Accept-Encoding":"gzip"
     }
     data = {
@@ -476,5 +478,8 @@ if __name__ == "__main__":
         send_speed_add(ck)
         send_speed_start(ck)
         print_now("\n")
+
+    print_now("提示：测试请在第二天凌晨12点30分后，使用5g信号再测试，部分地区4g不生效。\n提示：“鉴权失败”只代表未开通联通加速会员(非必须开通)，非代表破限速失败，请自行测试\n\n")
+    msg += f'提示：测试请在第二天凌晨12点30分后，使用5g信号再测试，部分地区4g不生效。\n提示：“鉴权失败”只代表未开通联通加速会员(非必须开通)，非代表破限速失败，请自行测试\n\n'
     if WXPUSHER_TOKEN != "" and WXPUSHER_TOPIC_ID != "" and msg != "":
         wxpusher("沃畅游破限速",msg)
