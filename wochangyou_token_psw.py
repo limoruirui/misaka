@@ -8,12 +8,14 @@
 # -------------------------------
 
 """
+说明：首次使用，联通app首页--5g新通信--联通畅游，点击个人中心，手动登录一遍
+
 沃畅游密码登录 获取access_token环境并自动新增或者更新青龙环境
 青龙环境变量：WoChangYouCK_PSW 手机号码&密码  账号和密码分别是联通app的账号和密码
 wxpusher推送(非必填)
 青龙变量：WoChangYouCK_WXPUSHER_TOKEN   wxpusher推送的token
-青龙变量：WoChangYouCK_WXPUSHER_TOPIC_ID   wxpusher推送的topicId
-
+青龙变量：WoChangYouCK_WXPUSHER_TOPIC_ID   wxpusher推送的topicId(主题ID，非UID)
+网址：https://wxpusher.zjiecode.com/admin/main/topics/list
 
 
 
@@ -351,6 +353,7 @@ if WoChangYouCK_WXPUSHER_TOPIC_ID_temp != "" and len(WoChangYouCK_WXPUSHER_TOPIC
     WXPUSHER_TOPIC_ID = WoChangYouCK_WXPUSHER_TOPIC_ID_temp[0]["value"]
 
 msg = ""
+isDebugger = False
 
 
 class RSA_Encrypt:
@@ -486,13 +489,13 @@ class UnicomLogin:
         response = requests.post('https://game.wostore.cn/api/app/user/v2/login', headers=headers, json=json_data)
         d = response.json().get('data')
         if not d or d == "":
-            print_now(f"可能是首次登录沃畅游。无法获取access_token，可先手动去联通app首页--5g新通信--联通畅游，登录一下")
+            print_now(f"可能是首次登录沃畅游。无法获取access_token，可先手动去联通app首页--5g新通信--联通畅游--个人中心，登录一下")
             return ""
         access_token = d.get('access_token',None)
         if not access_token and access_token != "":
             return access_token
         else:
-            print_now(f"可能是首次登录沃畅游。无法获取access_token，可先手动去联通app首页--5g新通信--联通畅游，登录一下")
+            print_now(f"可能是首次登录沃畅游。无法获取access_token，可先手动去联通app首页--5g新通信--联通畅游--个人中心，登录一下")
             return ""
 
 
@@ -571,7 +574,7 @@ class UnicomLogin:
     def deal_data(self):
         global msg
         if self.access_token == "" or self.access_token is None:
-            print_now(f'账号【{self.phone_num}】获取access_token失败\n')
+            print_now(f'账号【{self.phone_num}】获取access_token失败')
             msg += f'账号【{self.phone_num}】获取access_token失败\n\n'
             return ""
         try:
@@ -601,14 +604,14 @@ class UnicomLogin:
                             # disable_env(ck_temp["id"])
                             # delete_env(ck_temp["id"])
                         if put_flag:
-                            print_now(f"账号【{self.phone_num}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}\n")
+                            print_now(f"账号【{self.phone_num}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}")
                             msg += f"账号【{phone}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}\n\n"
                         else:
-                            print_now(f"账号【{self.phone_num}】自动更新access_token至青龙环境：失败\n")
+                            print_now(f"账号【{self.phone_num}】自动更新access_token至青龙环境：失败")
                             msg += f"账号【{phone}】自动更新access_token至青龙环境：失败\n\n"
             if not flag_temp:
                 post_envs("WoChangYouCK", self.access_token, phone)
-                print_now(f"账号【{self.phone_num}】自动新增access_token至青龙环境：WoChangYouCK  备注为：{phone}\n")
+                print_now(f"账号【{self.phone_num}】自动新增access_token至青龙环境：WoChangYouCK  备注为：{phone}")
                 msg += f"账号【{phone}】自动更新access_token至青龙环境：WoChangYouCK  备注为：{phone}\n\n"
         except Exception as e:
             print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{phone}】 登录失败，错误信息：{e}\n")
@@ -683,6 +686,11 @@ if __name__ == "__main__":
         password = tmp_list[1]
         print_now(f'开始执行第 {i+1} 个账号：{phone}')
         start(phone,password)
+        #解决随机时间问题
+        ran_time = random.randint(3, 5)
+        if isDebugger == False and i != (len(ck_list)-1):
+            print_now(f"随机休眠{ran_time}秒，执行下一个账号操作\n\n")
+            time.sleep(ran_time)
     if WXPUSHER_TOKEN != "" and WXPUSHER_TOPIC_ID != "" and msg != "":
         wxpusher("沃畅游密码登录",msg)
 
