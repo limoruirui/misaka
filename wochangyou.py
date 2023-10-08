@@ -8,6 +8,7 @@
 # -------------------------------
 
 """
+说明：首次使用，联通app首页--5g新通信--联通畅游，点击个人中心，手动登录一遍
 1. 沃畅游破限速 支持多账号执行 需要抓包沃畅游，找Authorization值 脚本仅供学习交流使用, 请在下载后24h内删除
 2. cron说明 晚上12点01分15秒开始执行 可直接使用默认cron，亦可以自行修改
 3. 环境变量说明:
@@ -17,9 +18,10 @@
 
 wxpusher推送(非必填)
 青龙变量：WoChangYouCK_WXPUSHER_TOKEN   wxpusher推送的token
-青龙变量：WoChangYouCK_WXPUSHER_TOPIC_ID   wxpusher推送的topicId
+青龙变量：WoChangYouCK_WXPUSHER_TOPIC_ID   wxpusher推送的topicId(主题ID，非UID)
+网址：https://wxpusher.zjiecode.com/admin/main/topics/list
 """
-import requests,re
+import requests,re, random
 import json, os
 import time
 from sys import stdout
@@ -323,39 +325,8 @@ if WoChangYouCK_WXPUSHER_TOPIC_ID_temp != "" and len(WoChangYouCK_WXPUSHER_TOPIC
     WXPUSHER_TOPIC_ID = WoChangYouCK_WXPUSHER_TOPIC_ID_temp[0]["value"]
 
 msg = ""
+isDebugger = False
 
-
-def send_speed_start(ck):
-    global msg
-    authorization = ck["value"]
-    remarks = ck["remarks"]
-    headers = {
-        'Host': 'game.wostore.cn',
-        'channelid': 'GAMELTJS_10001',
-        'Accept': 'application/json',
-        'Authorization': authorization,
-        'rnversion': 'undefined',
-        'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
-        'Content-Type': 'application/json;charset=utf-8',
-        'versioncode': '4014',
-        # 'User-Agent': 'GloudGame/68 CFNetwork/1312 Darwin/21.0.0',
-        'User-Agent': 'ChinaUnicom.x CFNetwork iOS/15.0.1 unicom{version:iphone_c@10.0700}',
-        'device': '2',
-    }
-
-    json_data = {
-        'channelId': 'GAMELTJS_10001',
-        'privateIp': '10.117.226.153',
-    }
-
-    try:
-        response = requests.post('https://game.wostore.cn/api/app/user/v3/qos/start', headers=headers, json=json_data)
-        # print(response.text)
-        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】加速发送成功，响应：{response.json()}")
-        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】加速发送成功，响应：{response.json()}\n\n"
-    except Exception as e:
-        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】加速发送失败，错误信息：{e}")
-        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】加速发送失败，错误信息：{e}\n\n"
 
 
 
@@ -411,11 +382,44 @@ def send_speed_add(ck):
 
     try:
         response = requests.post(url, headers=headers, data=json.dumps(data))
-        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】添加加速时间发送成功，响应：{response.json()}")
-        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】添加加速时间发送成功，响应：{response.json()}"
+        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】重置加速时间，响应：{response.json()}")
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】重置加速时间，响应：{response.json()}"
     except Exception as e:
-        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 添加加速时间发送失败，错误信息：{e}")
-        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】添加加速时间发送失败，错误信息：{e}"
+        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 重置加速时间发送失败，错误信息：{e}")
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】重置加速时间发送失败，错误信息：{e}"
+
+
+def send_speed_start(ck):
+    global msg
+    authorization = ck["value"]
+    remarks = ck["remarks"]
+    headers = {
+        'Host': 'game.wostore.cn',
+        'channelid': 'GAMELTJS_10001',
+        'Accept': 'application/json',
+        'Authorization': authorization,
+        'rnversion': 'undefined',
+        'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
+        'Content-Type': 'application/json;charset=utf-8',
+        'versioncode': '4014',
+        # 'User-Agent': 'GloudGame/68 CFNetwork/1312 Darwin/21.0.0',
+        'User-Agent': 'ChinaUnicom.x CFNetwork iOS/15.0.1 unicom{version:iphone_c@10.0700}',
+        'device': '2',
+    }
+
+    json_data = {
+        'channelId': 'GAMELTJS_10001',
+        'privateIp': '10.117.226.153',
+    }
+
+    try:
+        response = requests.post('https://game.wostore.cn/api/app/user/v3/qos/start', headers=headers, json=json_data)
+        # print(response.text)
+        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】立即加速，响应：{response.json()}")
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】立即加速，响应：{response.json()}\n\n"
+    except Exception as e:
+        print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】加速发送失败，错误信息：{e}")
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】加速发送失败，错误信息：{e}\n\n"
 
 
 if __name__ == "__main__":
@@ -477,9 +481,14 @@ if __name__ == "__main__":
         get_member_info(ck)
         send_speed_add(ck)
         send_speed_start(ck)
+        #解决随机时间问题
+        ran_time = random.randint(3, 5)
+        if isDebugger == False and i != (len(ck_list)-1):
+            print_now(f"随机休眠{ran_time}秒，执行下一个账号操作\n\n")
+            time.sleep(ran_time)
         print_now("\n")
 
-    print_now("提示：测试请在第二天凌晨12点30分后，使用5g信号再测试，部分地区4g不生效。\n提示：“鉴权失败”只代表未开通联通加速会员(非必须开通)，非代表破限速失败，请自行测试\n\n")
-    msg += f'提示：测试请在第二天凌晨12点30分后，使用5g信号再测试，部分地区4g不生效。\n提示：“鉴权失败”只代表未开通联通加速会员(非必须开通)，非代表破限速失败，请自行测试\n\n'
+    print_now("提示：\n测试请在第二天凌晨12点30分后，使用5g信号再测试，部分地区4g不生效。\n“鉴权失败”只代表未开通联通加速会员(非必须开通)，非代表破限速失败，请自行测试\n\n")
+    msg += f'提示：\n测试请在第二天凌晨12点30分后，使用5g信号再测试，部分地区4g不生效。\n“鉴权失败”只代表未开通联通加速会员(非必须开通)，非代表破限速失败，请自行测试\n\n'
     if WXPUSHER_TOKEN != "" and WXPUSHER_TOPIC_ID != "" and msg != "":
         wxpusher("沃畅游破限速",msg)
