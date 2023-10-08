@@ -383,10 +383,10 @@ def send_speed_add(ck):
     try:
         response = requests.post(url, headers=headers, data=json.dumps(data))
         print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】重置加速时间，响应：{response.json()}")
-        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】重置加速时间，响应：{response.json()}"
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】重置加速时间，响应：{response.json()}\n"
     except Exception as e:
         print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】 重置加速时间发送失败，错误信息：{e}")
-        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】重置加速时间发送失败，错误信息：{e}"
+        msg += f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{remarks}】重置加速时间发送失败，错误信息：{e}\n"
 
 
 def send_speed_start(ck):
