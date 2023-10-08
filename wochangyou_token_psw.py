@@ -399,8 +399,9 @@ class UnicomLogin:
         self.phone_num = phone.rstrip("\n")
         self.password = password.rstrip("\n")
         self.deviceId = uuid4().hex
-        self.appid = str(random.randint(0, 10))+"f"+str(random.randint(0, 10))+"af"+str(random.randint(0, 10))+"2ad6912d306b5053abf90c7ebbb695887bc870ae0706d573c348539c26c5c0a878641fcc0d3e90acb9be1e6ef858a59af546f3c826988332376b7d18c8ea2398ee3a9c3db947e2471d32a49612"
+        self.appid = str(random.randint(0, 10))+"f"+str(random.randint(0, 10))+"af"+str(random.randint(0, 10))+str(random.randint(0, 10))+"ad"+str(random.randint(0, 10))+"912d306b5053abf90c7ebbb695887bc870ae0706d573c348539c26c5c0a878641fcc0d3e90acb9be1e6ef858a59af546f3c826988332376b7d18c8ea2398ee3a9c3db947e2471d32a49612"
         self.access_token = ""
+        self.UA = "Mozilla/5.0 (Linux; Android 13; LE2100 Build/TP1A.220905.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/103.0.5060.129 Mobile Safari/537.36; unicom{version:android@10.0100,desmobile:"+self.phone_num+"};devicetype{deviceBrand:OnePlus,deviceModel:LE2100};{yw_code:}"
 
 
     def login_unicom(self):
@@ -408,7 +409,8 @@ class UnicomLogin:
         headers = {
             'Host': 'm.client.10010.com',
             'Accept': '*/*',
-            'User-Agent': 'ChinaUnicom.x CFNetwork iOS/15.0.1 unicom{version:iphone_c@10.0700}',
+            # 'User-Agent': 'ChinaUnicom.x CFNetwork iOS/15.0.1 unicom{version:iphone_c@10.0700}',
+            'User-Agent': self.UA,
             'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
             'Content-Type': 'application/x-www-form-urlencoded',
         }
@@ -508,6 +510,9 @@ class UnicomLogin:
         while True:
             if count < 3 and self.access_token == "":
                 count = self.login(count)
+                if self.access_token == "":
+                    print_now(f"休眠3秒，再次请求获取access_token\n\n")
+                    time.sleep(3)
             else:
                 break
         if self.access_token == "":
@@ -558,7 +563,11 @@ class UnicomLogin:
                 data = text["data"]
                 access_token = data["access_token"]
                 # print_now(f'账号{self.phone_num}登录成功，成功获取access_token,额外需要使用时请复制保存: {access_token}\n')
-                self.access_token = access_token
+                if access_token is None or access_token == "":
+                    self.access_token = ""
+                    count += 1
+                else:
+                    self.access_token = access_token
             else:
                 print_now(f"【{time.strftime('%Y-%m-%d %H:%M:%S')}】 ---- 【{self.phone_num}】 登录请求响应：{text}\n")
                 self.access_token = ""
@@ -691,6 +700,8 @@ if __name__ == "__main__":
         if isDebugger == False and i != (len(ck_list)-1):
             print_now(f"随机休眠{ran_time}秒，执行下一个账号操作\n\n")
             time.sleep(ran_time)
+        else:
+            print_now("\n\n")
     if WXPUSHER_TOKEN != "" and WXPUSHER_TOPIC_ID != "" and msg != "":
         wxpusher("沃畅游密码登录",msg)
 
