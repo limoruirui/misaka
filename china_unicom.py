@@ -136,7 +136,7 @@ class China_Unicom:
         self.get_cntindex()
         self.get_chapterallindex()
         self.print_now(f"{self.phone_num} ：正在执行观看300次小说, 此过程较久, 最大时长为300 * 8s = 40min")
-        for i in range(300):
+        for i in range(150):
             date = datetime.today().__format__("%Y%m%d%H%M%S")
             chapterAllIndex = choice(self.chapterallindex_list)
             url = f"https://10010.woread.com.cn/ng_woread_service/rest/cnt/wordsDetail?catid={self.catid}&pageIndex={self.pageIndex}&cardid={randint(10000, 99999)}&cntindex={self.cntindex}&chapterallindex={chapterAllIndex}&chapterseno=3"
