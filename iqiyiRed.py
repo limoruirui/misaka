@@ -227,13 +227,12 @@ class Iqiyi:
         self.get_level()
         if int(self.level) >= 5:
             self.genRedNo()
-            if len(self.redNo) == 28:
-                self.last_num = self.last_redNo(self.redNo)
-                if self.last_num > 0:
-                    self.print_now(f"您的红包码为{self.redNo}, 正在尝试提交")
-                    self.post_redNo()
-                else:
-                    self.print_now(f"您本月的会员红包已被领完, 不提交")
+            self.last_num = self.last_redNo(self.redNo)
+            if self.last_num > 0:
+                self.print_now(f"您的红包码为{self.redNo}, 正在尝试提交")
+                self.post_redNo()
+            else:
+                self.print_now(f"您本月的会员红包已被领完, 不提交")
         redNo_list = self.get_redNo()
         if len(self.redNo) == 28 and len(redNo_list) > 6:
             redNo_list.insert(0, self.redNo)
